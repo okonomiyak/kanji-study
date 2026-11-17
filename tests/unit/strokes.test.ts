@@ -6,8 +6,10 @@ import {
   compactOps,
   hasInk,
   normalizePoint,
+  redoStep,
   sanitizeOps,
   undo,
+  undoStep,
   visibleOps,
   type Op,
   type StrokeOp,
@@ -81,5 +83,20 @@ describe("strokes", () => {
       ]),
     ).toEqual([pen(), { type: "clear" }]);
     expect(sanitizeOps("x")).toEqual([]);
+  });
+
+  it("戻した操作をやり直せる。何もないときは変わらない", () => {
+    const a = pen(0.1);
+    const b = pen(0.2);
+    let h = undoStep([a, b], []);
+    expect(h).toEqual({ ops: [a], redo: [b] });
+    h = undoStep(h.ops, h.redo);
+    expect(h).toEqual({ ops: [], redo: [b, a] });
+    h = redoStep(h.ops, h.redo);
+    expect(h).toEqual({ ops: [a], redo: [b] });
+    h = redoStep(h.ops, h.redo);
+    expect(h).toEqual({ ops: [a, b], redo: [] });
+    expect(redoStep(h.ops, h.redo)).toEqual({ ops: [a, b], redo: [] });
+    expect(undoStep([], [a])).toEqual({ ops: [], redo: [a] });
   });
 });

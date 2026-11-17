@@ -1,7 +1,7 @@
 <script lang="ts">
   import CountPicker from "../../components/CountPicker.svelte";
   import { btn } from "../../components/buttons";
-  import { pickReview } from "../../domain/picker";
+  import { pickReview, resolveCount } from "../../domain/picker";
   import { history } from "../../state/history.svelte";
   import { launcher } from "../../state/launcher.svelte";
   import { settings } from "../../state/settings.svelte";
@@ -9,7 +9,7 @@
   /** 復習の出題（仕様書 6.3）。連続正解の少ないもの、間違いの多いものを優先 */
   let wanted = $state(settings.value.lastCount);
   const entries = $derived([...history.review.values()]);
-  const count = $derived(Math.min(wanted, entries.length));
+  const count = $derived(resolveCount(wanted, entries.length));
 
   async function start() {
     if (count === 0) return;

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  filterQuestionStats,
+  NO_FILTER,
   overallStats,
+  roundsInStats,
   sortQuestionStats,
   statsByQuestion,
   statsByRound,
@@ -88,5 +91,19 @@ describe("統計", () => {
     expect(ids("wrong", "desc")).toEqual(["49-2", "49-1", "50-1", "99-1"]);
     expect(ids("total", "asc")).toEqual(["99-1", "49-1", "49-2", "50-1"]);
     expect(s.map((x) => x.questionId)).toEqual(ids("order", "asc")); // 元は変えない
+  });
+
+  it("漢字ごとの絞り込み: 回・結果・文字", () => {
+    const s = statsByQuestion(a, qs);
+    const ids = (f: Partial<typeof NO_FILTER>) =>
+      filterQuestionStats(s, { ...NO_FILTER, ...f }).map((x) => x.questionId);
+    expect(roundsInStats(s)).toEqual([49, 50, 99]);
+    expect(ids({})).toEqual(["49-1", "49-2", "50-1", "99-1"]);
+    expect(ids({ round: 49 })).toEqual(["49-1", "49-2"]);
+    expect(ids({ result: "missed" })).toEqual(["49-1", "49-2", "50-1"]);
+    expect(ids({ result: "perfect" })).toEqual(["99-1"]);
+    const kanji = s[0]?.question?.kanji ?? "";
+    expect(ids({ query: kanji })).toContain("49-1");
+    expect(ids({ query: "存在しない文字列" })).toEqual([]);
   });
 });

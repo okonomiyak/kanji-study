@@ -46,12 +46,7 @@ export async function answerOne(
 ) {
   if (from === "setup") {
     await page.goto("/#/setup");
-    // 前回の範囲が残っているので、一度すべて外してから指定の回だけを選ぶ
-    const pressed = page.locator('button[aria-pressed="true"]');
-    while ((await pressed.count()) > 0) await pressed.first().click();
-    await page
-      .getByRole("button", { name: new RegExp(`第${round}回`) })
-      .click();
+    await selectOnlyRound(page, round);
     await page.getByLabel("自由に決める").check();
     await page.getByLabel("問題数").fill("1");
     await page.getByRole("button", { name: "1 問で始める" }).click();
@@ -72,4 +67,18 @@ export async function answerOne(
   await page.getByRole("button", { name: "採点を確定" }).click();
   await expect(page.getByTestId("score")).toBeVisible();
   await page.getByRole("button", { name: "ホームへ" }).click();
+}
+
+/** 出題の設定で、指定の回だけを選ぶ（最初はすべての回が選ばれている） */
+export async function selectOnlyRound(page: Page, round: number) {
+  const button = page.getByRole("button", {
+    name: new RegExp(`第${round}回`),
+  });
+  await expect(button).toBeVisible(); // 問題データの読み込みを待つ
+  const all = page.getByLabel("すべての回");
+  await all.check(); // 一部だけ選ばれていても、一度すべてにしてから
+  await all.uncheck();
+  await button.click();
+  await expect(button).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByTestId("range-count")).not.toHaveText("0");
 }

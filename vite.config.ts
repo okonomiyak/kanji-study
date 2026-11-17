@@ -42,6 +42,18 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
+            // 同梱のフォント（Noto Sans JP）は文字の範囲ごとに分かれているので、使った分だけ残す
+            urlPattern: ({ url }) =>
+              url.pathname.startsWith("/assets/") &&
+              url.pathname.endsWith(".woff2"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "fonts",
+              expiration: { maxEntries: 200 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+          {
             // 問題データは「まずネット、だめならキャッシュ」
             urlPattern: ({ url }) => url.pathname === "/data/questions.json",
             handler: "NetworkFirst",

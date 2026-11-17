@@ -32,3 +32,12 @@ export function pickReview(
     .map((e) => e.questionId);
   return shuffle(chosen, rng);
 }
+
+/** 問題数の「すべて」を表す値（設定にもこの値で保存する） */
+export const ALL_QUESTIONS = 0;
+
+/** 実際に出す問題数。「すべて」なら対象の全部、多すぎる指定は対象の数まで */
+export function resolveCount(wanted: number, available: number): number {
+  if (wanted === ALL_QUESTIONS) return available;
+  return Math.max(0, Math.min(Math.floor(wanted), available));
+}

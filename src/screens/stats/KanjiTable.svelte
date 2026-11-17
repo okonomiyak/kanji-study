@@ -1,8 +1,12 @@
 <script lang="ts">
   import { formatRate } from "../../domain/format";
   import {
+    NO_FILTER,
+    filterQuestionStats,
+    roundsInStats,
     sortQuestionStats,
     type QuestionStats,
+    type StatsFilter,
     type SortDir,
     type StatsSortKey,
   } from "../../domain/stats";
@@ -18,7 +22,14 @@
   ];
   let sortKey = $state<StatsSortKey>("order");
   let sortDir = $state<SortDir>("asc");
-  const sorted = $derived(sortQuestionStats(items, sortKey, sortDir));
+  let filter = $state<StatsFilter>({ ...NO_FILTER });
+  const rounds = $derived(roundsInStats(items));
+  const sorted = $derived(
+    sortQuestionStats(filterQuestionStats(items, filter), sortKey, sortDir),
+  );
+  const filtered = $derived(
+    filter.round !== null || filter.result !== "all" || filter.query !== "",
+  );
 
   /** 見出しを押したとき: 同じ列なら向きを変え、違う列ならその列のよく使う向きで並べる */
   function sortBy(key: StatsSortKey) {
@@ -48,6 +59,49 @@
   </th>
 {/snippet}
 
+<div
+  class="mb-2 flex flex-wrap items-center gap-2 text-sm"
+  data-testid="kanji-filter"
+>
+  <label class="flex items-center gap-1"
+    >回
+    <select
+      class="rounded-lg border border-stone-300 bg-white px-2 py-1"
+      bind:value={filter.round}
+      aria-label="回で絞り込む"
+    >
+      <option value={null}>すべての回</option>
+      {#each rounds as r (r)}<option value={r}>第{r}回</option>{/each}
+    </select></label
+  >
+  <label class="flex items-center gap-1"
+    >結果
+    <select
+      class="rounded-lg border border-stone-300 bg-white px-2 py-1"
+      bind:value={filter.result}
+      aria-label="結果で絞り込む"
+    >
+      <option value="all">すべて</option>
+      <option value="missed">間違えたことがある</option>
+      <option value="perfect">全部正解</option>
+    </select></label
+  >
+  <input
+    type="search"
+    class="w-40 rounded-lg border border-stone-300 bg-white px-2 py-1"
+    placeholder="漢字・読みで探す"
+    aria-label="漢字・読みで探す"
+    bind:value={filter.query}
+  />
+  {#if filtered}
+    <span class="text-stone-500" data-testid="filter-count"
+      >{sorted.length} / {items.length} 件</span
+    >
+    <button class="underline" onclick={() => (filter = { ...NO_FILTER })}
+      >絞り込みを外す</button
+    >
+  {/if}
+</div>
 <div class="mb-2 flex flex-wrap items-center gap-2 text-sm">
   <label class="flex items-center gap-1"
     >並べ替え
@@ -106,7 +160,10 @@
         </tr>
       {:else}
         <tr
-          ><td class="p-2 text-stone-500" colspan="7">まだ記録がありません</td
+          ><td class="p-2 text-stone-500" colspan="7"
+            >{items.length
+              ? "条件に合う漢字がありません"
+              : "まだ記録がありません"}</td
           ></tr
         >
       {/each}

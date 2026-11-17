@@ -1,7 +1,8 @@
 <script lang="ts">
   import CountPicker from "../../components/CountPicker.svelte";
   import { btn } from "../../components/buttons";
-  import { pickRandom } from "../../domain/picker";
+  import { pickRandom, resolveCount } from "../../domain/picker";
+  import { listRounds } from "../../domain/questions";
   import { EMPTY_RANGE, describeRange, resolveRange } from "../../domain/range";
   import type { RangeSpec } from "../../domain/types";
   import { launcher } from "../../state/launcher.svelte";
@@ -9,13 +10,18 @@
   import { settings } from "../../state/settings.svelte";
   import RangePicker from "./RangePicker.svelte";
 
-  let range = $state<RangeSpec>(
-    structuredClone($state.snapshot(settings.value.lastRange) ?? EMPTY_RANGE),
-  );
+  // 回の選択は、開くたびに「すべての回」から始める（問題データの読み込みを待つ）
+  let range = $state<RangeSpec>(EMPTY_RANGE);
+  let initialized = false;
+  $effect(() => {
+    if (initialized || questions.list.length === 0) return;
+    initialized = true;
+    range = { spans: [], rounds: listRounds(questions.list) };
+  });
   let wanted = $state(settings.value.lastCount);
 
   const ids = $derived(resolveRange(questions.list, range));
-  const count = $derived(Math.min(wanted, ids.length));
+  const count = $derived(resolveCount(wanted, ids.length));
 
   async function start() {
     if (count === 0) return;

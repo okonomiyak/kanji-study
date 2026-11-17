@@ -27,8 +27,7 @@ test.describe("PWA", () => {
     await page.reload();
     await expect(page.getByRole("link", { name: "出題する" })).toBeVisible();
     await page.getByRole("link", { name: "出題する" }).click();
-    await page.getByRole("button", { name: /第49回/ }).click();
-    await expect(page.getByTestId("range-count")).toHaveText("22");
+    await expect(page.getByTestId("range-count")).toHaveText("129");
     await context.setOffline(false);
   });
 

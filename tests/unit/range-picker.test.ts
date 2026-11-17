@@ -4,7 +4,12 @@ import {
   resolveRange,
   sanitizeRange,
 } from "../../src/domain/range";
-import { pickRandom, pickReview } from "../../src/domain/picker";
+import {
+  ALL_QUESTIONS,
+  pickRandom,
+  pickReview,
+  resolveCount,
+} from "../../src/domain/picker";
 import { seededRng } from "../../src/domain/random";
 import { loadFixtureQuestions, loadRealQuestions } from "./helpers";
 
@@ -112,5 +117,14 @@ describe("ランダム選択", () => {
       ]);
     }
     expect(pickReview(entries, 1, seededRng(0))).toEqual(["d"]);
+  });
+});
+
+describe("問題数", () => {
+  it("すべて・多すぎる指定・ふつうの指定", () => {
+    expect(resolveCount(ALL_QUESTIONS, 42)).toBe(42);
+    expect(resolveCount(100, 42)).toBe(42);
+    expect(resolveCount(10, 42)).toBe(10);
+    expect(resolveCount(10, 0)).toBe(0);
   });
 });

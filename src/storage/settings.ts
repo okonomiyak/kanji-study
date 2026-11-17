@@ -9,6 +9,7 @@ export interface Settings {
   /** 最後に使った出題範囲（仕様書 9.4） */
   lastRange: RangeSpec | null;
   /** 最後に選んだ問題数 */
+  /** 問題数。0 は「すべて」 */
   lastCount: number;
 }
 
@@ -38,7 +39,9 @@ export function loadSettings(
         typeof v.penOnly === "boolean" ? v.penOnly : DEFAULT_SETTINGS.penOnly,
       lastRange: sanitizeRange(v.lastRange),
       lastCount:
-        typeof v.lastCount === "number" && v.lastCount >= 1
+        typeof v.lastCount === "number" &&
+        Number.isFinite(v.lastCount) &&
+        v.lastCount >= 0
           ? Math.floor(v.lastCount)
           : DEFAULT_SETTINGS.lastCount,
     };

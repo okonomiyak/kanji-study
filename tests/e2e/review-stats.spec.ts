@@ -70,3 +70,25 @@ test("統計の漢字ごとの一覧を並べ替えられる", async ({ page }) 
   await page.getByTestId("sort-dir").click();
   await expect(firstId).toHaveText(/^50-/);
 });
+
+test("統計の漢字ごとの一覧を回や結果で絞り込める", async ({ page }) => {
+  await answerOne(page, false, "setup", 49);
+  await answerOne(page, true, "setup", 50);
+  await page.getByRole("link", { name: "統計" }).click();
+  await page.getByRole("tab", { name: "漢字ごと" }).click();
+  const rows = page.locator("tbody tr");
+  await expect(rows).toHaveCount(2);
+
+  await page.getByLabel("回で絞り込む").selectOption("第50回");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first().locator("td").first()).toHaveText(/^50-/);
+  await expect(page.getByTestId("filter-count")).toHaveText("1 / 2 件");
+
+  await page.getByLabel("回で絞り込む").selectOption("すべての回");
+  await page.getByLabel("結果で絞り込む").selectOption("間違えたことがある");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first().locator("td").first()).toHaveText(/^49-/);
+
+  await page.getByRole("button", { name: "絞り込みを外す" }).click();
+  await expect(rows).toHaveCount(2);
+});

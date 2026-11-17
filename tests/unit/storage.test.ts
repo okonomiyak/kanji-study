@@ -145,5 +145,8 @@ describe("設定", () => {
       JSON.stringify({ penWidth: "huge", lastCount: -1 }),
     );
     expect(loadSettings(s)).toEqual(DEFAULT_SETTINGS);
+    // 0 は「すべて」
+    s.setItem("kanji-study:settings", JSON.stringify({ lastCount: 0 }));
+    expect(loadSettings(s).lastCount).toBe(0);
   });
 });

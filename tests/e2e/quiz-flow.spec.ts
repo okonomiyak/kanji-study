@@ -1,10 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
-import { drawOn, inkPixels } from "./helpers";
+import { drawOn, inkPixels, selectOnlyRound } from "./helpers";
 
 async function startThreeQuestions(page: Page) {
   await page.goto("/");
   await page.getByRole("link", { name: "出題する" }).click();
-  await page.getByRole("button", { name: /第49回/ }).click();
+  await selectOnlyRound(page, 49);
   await expect(page.getByTestId("range-count")).toHaveText("22");
   await page.getByLabel("自由に決める").check();
   await page.getByLabel("問題数").fill("3");
@@ -73,11 +73,38 @@ test("解答中に再読み込みしても手書きと位置が残り、再開�
   await expect.poll(() => inkPixels(page)).toBeGreaterThan(50);
 });
 
-test("最後に使った出題範囲が次回の初期値になる", async ({ page }) => {
+test("回の選択は最初からすべてオンで、まとめてオン・オフできる。問題数は前回の値", async ({
+  page,
+}) => {
   await startThreeQuestions(page);
   await page.getByRole("button", { name: "中断" }).click();
   await page.getByRole("button", { name: "破棄する" }).click();
   await page.getByRole("link", { name: "出題する" }).click();
-  await expect(page.getByTestId("range-count")).toHaveText("22");
+  const all = page.getByLabel("すべての回");
+  await expect(all).toBeChecked();
+  await expect(page.getByTestId("range-count")).toHaveText("129");
   await expect(page.getByLabel("問題数")).toHaveValue("3");
+
+  await all.uncheck();
+  await expect(page.getByTestId("range-count")).toHaveText("0");
+  await page.getByRole("button", { name: /第50回/ }).click();
+  await expect(all).not.toBeChecked();
+  await all.check();
+  await expect(page.getByTestId("range-count")).toHaveText("129");
+});
+
+test("問題数: すべて、対象より多い自由な数は対象の数だけ出す", async ({
+  page,
+}) => {
+  await page.goto("/#/setup");
+  await selectOnlyRound(page, 49);
+  await page.getByRole("radio", { name: /^すべて/ }).check();
+  await expect(
+    page.getByRole("button", { name: "22 問で始める" }),
+  ).toBeVisible();
+  await page.getByLabel("自由に決める").check();
+  await page.getByLabel("問題数").fill("100");
+  await expect(page.getByText("22 問（全部）を出します")).toBeVisible();
+  await page.getByRole("button", { name: "22 問で始める" }).click();
+  await expect(page.getByTestId("progress")).toHaveText("1 / 22");
 });

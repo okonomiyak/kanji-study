@@ -63,6 +63,28 @@ export function canUndo(ops: readonly Op[]): boolean {
   return ops.length > 0;
 }
 
+/** 戻した操作を覚えておく「やり直し」の列（最後が次にやり直す操作）。保存はしない */
+export interface InkHistory {
+  ops: Op[];
+  redo: Op[];
+}
+
+/** 1つ戻し、戻した操作をやり直しの列に積む */
+export function undoStep(ops: readonly Op[], redo: readonly Op[]): InkHistory {
+  const last = ops[ops.length - 1];
+  return last
+    ? { ops: ops.slice(0, -1), redo: [...redo, last] }
+    : { ops: [...ops], redo: [...redo] };
+}
+
+/** 戻した操作を1つやり直す */
+export function redoStep(ops: readonly Op[], redo: readonly Op[]): InkHistory {
+  const next = redo[redo.length - 1];
+  return next
+    ? { ops: [...ops, next], redo: redo.slice(0, -1) }
+    : { ops: [...ops], redo: [...redo] };
+}
+
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 /** 画面上の座標を割合にする */

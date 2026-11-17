@@ -74,3 +74,27 @@ test("ペン入力のみのときは指の入力を無視する", async ({ page 
   await draw("pen");
   expect(await inkPixels(page)).toBeGreaterThan(50);
 });
+
+test.describe("やり直し", () => {
+  test.skip(({ isMobile }) => isMobile, "マウス操作はPCのみ");
+
+  test("1つ戻した操作をやり直せる。新しく書くとやり直せなくなる", async ({
+    page,
+  }) => {
+    await page.goto("/#/trial");
+    const redo = page.getByRole("button", { name: "やり直す" });
+    await expect(redo).toBeDisabled();
+    await drawLine(page);
+    const afterPen = await inkPixels(page);
+    await page.getByRole("button", { name: "1つ戻す" }).click();
+    expect(await inkPixels(page)).toBe(0);
+    await expect(redo).toBeEnabled();
+    await redo.click();
+    expect(await inkPixels(page)).toBe(afterPen);
+    await expect(redo).toBeDisabled();
+
+    await page.getByRole("button", { name: "1つ戻す" }).click();
+    await drawLine(page);
+    await expect(redo).toBeDisabled();
+  });
+});

@@ -10,7 +10,9 @@
     PEN_WIDTHS,
     canUndo,
     clearAll,
-    undo,
+    redoStep,
+    undoStep,
+    type Op,
     type Tool,
   } from "../../handwriting/strokes";
   import { activeQuiz } from "../../state/active-quiz.svelte";
@@ -31,6 +33,22 @@
     quiz ? questions.get(quiz.questionIds[index] ?? "") : undefined,
   );
   const ops = $derived(activeQuiz.inks[index] ?? []);
+  // 問題ごとの「やり直し」の列（画面を離れたら消える）
+  let redoStacks = $state.raw<Record<number, Op[]>>({});
+  const redo = $derived(redoStacks[index] ?? []);
+
+  function setInk(next: Op[], nextRedo: Op[] = []) {
+    activeQuiz.setInk(index, next);
+    redoStacks = { ...redoStacks, [index]: nextRedo };
+  }
+  function undoInk() {
+    const h = undoStep(ops, redo);
+    setInk(h.ops, h.redo);
+  }
+  function redoInk() {
+    const h = redoStep(ops, redo);
+    setInk(h.ops, h.redo);
+  }
   const isLast = $derived(index === total - 1);
 
   $effect(() => {
@@ -52,9 +70,13 @@
 
   function onKey(e: KeyboardEvent) {
     if (shouldIgnoreKey(e, { allowModifiers: true })) return;
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+    const k = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && (k === "y" || (k === "z" && e.shiftKey))) {
       e.preventDefault();
-      activeQuiz.setInk(index, undo(ops));
+      redoInk();
+    } else if ((e.ctrlKey || e.metaKey) && k === "z") {
+      e.preventDefault();
+      undoInk();
     } else if (e.ctrlKey || e.metaKey || e.altKey) {
       return;
     } else if (e.key === "ArrowRight") activeQuiz.goTo(index + 1);
@@ -84,9 +106,11 @@
       <ToolBar
         {tool}
         canUndo={canUndo(ops)}
+        canRedo={redo.length > 0}
         onTool={(t) => (tool = t)}
-        onUndo={() => activeQuiz.setInk(index, undo(ops))}
-        onClear={() => activeQuiz.setInk(index, clearAll(ops))}
+        onUndo={undoInk}
+        onRedo={redoInk}
+        onClear={() => setInk(clearAll(ops))}
       />
     {/snippet}
     {#snippet text()}
@@ -109,7 +133,7 @@
             ? PEN_WIDTHS[settings.value.penWidth]
             : ERASER_WIDTH}
           penOnly={settings.value.penOnly}
-          onchange={(o) => activeQuiz.setInk(index, o)}
+          onchange={(o) => setInk(o)}
           label="{index + 1}問目の手書き欄"
         />
       {/key}

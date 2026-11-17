@@ -51,6 +51,15 @@
     });
   }
 
+  const allOn = $derived(
+    rounds.length > 0 && rounds.every((r) => range.rounds.includes(r)),
+  );
+  const someOn = $derived(rounds.some((r) => range.rounds.includes(r)));
+
+  function setAll(on: boolean) {
+    onchange({ ...range, rounds: on ? [...rounds] : [] });
+  }
+
   function addSpan() {
     const from: QuestionRef = { round: fromRound, number: fromNumber };
     const to: QuestionRef = { round: toRound, number: toNumber };
@@ -70,6 +79,16 @@
 <div class="space-y-5">
   <fieldset>
     <legend class="mb-2 font-bold">回を選ぶ</legend>
+    <label class="mb-2 flex min-h-11 w-fit items-center gap-2">
+      <input
+        type="checkbox"
+        class="size-5"
+        checked={allOn}
+        indeterminate={someOn && !allOn}
+        onchange={(e) => setAll(e.currentTarget.checked)}
+      />
+      すべての回
+    </label>
     <div class="flex flex-wrap gap-2">
       {#each rounds as r (r)}
         {@const on = range.rounds.includes(r)}

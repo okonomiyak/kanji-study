@@ -156,3 +156,49 @@ export function sortQuestionStats(
   });
   return indexed.map(({ s }) => s);
 }
+
+export type ResultFilter = "all" | "missed" | "perfect";
+
+export interface StatsFilter {
+  /** 回で絞る。null はすべての回 */
+  round: number | null;
+  /** missed: 間違えたことがある、perfect: 全部正解 */
+  result: ResultFilter;
+  /** 漢字・読み・本文に含まれる文字で探す（空なら絞らない） */
+  query: string;
+}
+
+export const NO_FILTER: StatsFilter = { round: null, result: "all", query: "" };
+
+/** 漢字ごとの統計を絞り込む（並びは変えない） */
+export function filterQuestionStats(
+  items: readonly QuestionStats[],
+  filter: StatsFilter,
+): QuestionStats[] {
+  const query = filter.query.trim();
+  return items.filter((s) => {
+    if (
+      filter.round !== null &&
+      parseQuestionId(s.questionId)?.round !== filter.round
+    )
+      return false;
+    if (filter.result === "missed" && s.wrong === 0) return false;
+    if (filter.result === "perfect" && s.wrong > 0) return false;
+    if (query) {
+      const q = s.question;
+      const text = q ? `${q.kanji} ${q.yomi} ${q.furu}` : "";
+      if (!text.includes(query)) return false;
+    }
+    return true;
+  });
+}
+
+/** 統計に出てくる回（小さい順） */
+export function roundsInStats(items: readonly QuestionStats[]): number[] {
+  const set = new Set<number>();
+  for (const s of items) {
+    const r = parseQuestionId(s.questionId)?.round;
+    if (r !== undefined) set.add(r);
+  }
+  return [...set].sort((a, b) => a - b);
+}

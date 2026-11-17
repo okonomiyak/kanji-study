@@ -5,7 +5,9 @@
     PEN_WIDTHS,
     canUndo,
     clearAll,
-    undo,
+    redoStep,
+    undoStep,
+    type InkHistory,
     type Op,
     type Tool,
   } from "../../handwriting/strokes";
@@ -13,7 +15,9 @@
   import ToolBar from "../answer/ToolBar.svelte";
 
   /** 試し書き（フェーズ3の確認用） */
-  let ops = $state<Op[]>([]);
+  let ops = $state.raw<Op[]>([]);
+  let redo = $state.raw<Op[]>([]);
+  const apply = (h: InkHistory) => ({ ops, redo } = h);
   let tool = $state<Tool>("pen");
   let penOnly = $state(false);
   let lastRenderMs = $state(0);
@@ -43,9 +47,11 @@
   <ToolBar
     {tool}
     canUndo={canUndo(ops)}
+    canRedo={redo.length > 0}
     onTool={(t) => (tool = t)}
-    onUndo={() => (ops = undo(ops))}
-    onClear={() => (ops = clearAll(ops))}
+    onUndo={() => apply(undoStep(ops, redo))}
+    onRedo={() => apply(redoStep(ops, redo))}
+    onClear={() => apply({ ops: clearAll(ops), redo: [] })}
   />
   <div class="min-h-0 flex-1">
     <HandwritingCanvas
@@ -53,7 +59,7 @@
       {tool}
       width={tool === "pen" ? PEN_WIDTHS.normal : ERASER_WIDTH}
       {penOnly}
-      onchange={(o) => (ops = o)}
+      onchange={(o) => apply({ ops: o, redo: [] })}
     />
   </div>
 </div>
