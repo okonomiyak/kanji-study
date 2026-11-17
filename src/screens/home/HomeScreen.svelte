@@ -7,6 +7,29 @@
   import { activeQuiz } from "../../state/active-quiz.svelte";
   import { history } from "../../state/history.svelte";
   import { router } from "../../state/router.svelte";
+  import { isIOS, isStandalone, pwa } from "../../state/pwa.svelte";
+
+  const INSTALL_HINT_KEY = "kanji-study:install-hint-dismissed";
+  function shouldShowInstallHint() {
+    try {
+      return (
+        isIOS() &&
+        !isStandalone() &&
+        localStorage.getItem(INSTALL_HINT_KEY) !== "1"
+      );
+    } catch {
+      return false;
+    }
+  }
+  let showInstallHint = $state(shouldShowInstallHint());
+  function dismissInstallHint() {
+    showInstallHint = false;
+    try {
+      localStorage.setItem(INSTALL_HINT_KEY, "1");
+    } catch {
+      // 保存できなくてもよい
+    }
+  }
 
   let lastExport = $state(getLastExportAt());
   const days = $derived(
@@ -30,6 +53,29 @@
     <h1 class="text-2xl font-bold">漢字の書き取り</h1>
     <a href="#/settings" class="text-stone-600 underline">設定</a>
   </header>
+
+  {#if pwa.needRefresh}
+    <div
+      class="flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-300 bg-emerald-50 p-4"
+      role="status"
+    >
+      <p>新しい版があります。</p>
+      <button class={btn.secondary} onclick={() => pwa.applyUpdate()}
+        >更新する</button
+      >
+    </div>
+  {/if}
+
+  {#if showInstallHint}
+    <div class="rounded-2xl border border-sky-300 bg-sky-50 p-4" role="note">
+      <p class="mb-2">
+        Safari の共有ボタンから<strong>「ホーム画面に追加」</strong
+        >して、そこから開いて使ってください。
+        ブラウザのまま使うと、7日間開かなかったときに記録が消えることがあります。
+      </p>
+      <button class={btn.small} onclick={dismissInstallHint}>閉じる</button>
+    </div>
+  {/if}
 
   {#if warn}
     <div
