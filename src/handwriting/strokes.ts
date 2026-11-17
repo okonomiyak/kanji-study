@@ -24,7 +24,7 @@ export interface ClearOp {
 export type Op = StrokeOp | ClearOp;
 
 /** 線の太さの選択肢（一辺に対する割合） */
-export const PEN_WIDTHS = { thin: 0.016, normal: 0.026, thick: 0.04 } as const;
+export const PEN_WIDTHS = { thin: 0.01, normal: 0.016, thick: 0.026 } as const;
 export type PenWidth = keyof typeof PEN_WIDTHS;
 export const ERASER_WIDTH = 0.08;
 
