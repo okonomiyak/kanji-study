@@ -16,6 +16,45 @@ export function pickRandom(
 }
 
 /**
+ * 優先する問題を先に選ぶ出題。priority に入っている候補（間違えた問題・まだ解いていない問題）から
+ * ランダムに選び、足りない分だけ残りから選ぶ。選んだ中の順番はランダムにする。
+ */
+export function pickPrioritized(
+  candidates: readonly QuestionId[],
+  count: number,
+  priority: ReadonlySet<QuestionId>,
+  rng: Rng,
+): QuestionId[] {
+  const unique = [...new Set(candidates)];
+  const first = shuffle(
+    unique.filter((id) => priority.has(id)),
+    rng,
+  );
+  const rest = shuffle(
+    unique.filter((id) => !priority.has(id)),
+    rng,
+  );
+  const n = Math.max(0, Math.min(count, unique.length));
+  return shuffle([...first, ...rest].slice(0, n), rng);
+}
+
+/**
+ * 優先する問題: いま復習リストにある（間違えて、まだ復習が済んでいない）問題と、まだ一度も解いていない問題
+ */
+export function priorityIds(
+  candidates: readonly QuestionId[],
+  reviewIds: ReadonlySet<QuestionId>,
+  answeredIds: ReadonlySet<QuestionId>,
+): { wrong: QuestionId[]; unanswered: QuestionId[] } {
+  return {
+    wrong: candidates.filter((id) => reviewIds.has(id)),
+    unanswered: candidates.filter(
+      (id) => !reviewIds.has(id) && !answeredIds.has(id),
+    ),
+  };
+}
+
+/**
  * 復習の出題（仕様書 6.3）。連続正解の少ないもの、次に間違えた回数の多いものを優先して選び、
  * 選んだ中の順番はランダムにする。同じ優先度の中ではランダム。
  */

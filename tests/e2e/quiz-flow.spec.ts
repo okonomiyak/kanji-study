@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { drawOn, inkPixels, selectOnlyRound } from "./helpers";
+import { answerOne, drawOn, inkPixels, selectOnlyRound } from "./helpers";
 
 async function startThreeQuestions(page: Page) {
   await page.goto("/");
@@ -107,4 +107,28 @@ test("問題数: すべて、対象より多い自由な数は対象の数だけ
   await expect(page.getByText("22 問（全部）を出します")).toBeVisible();
   await page.getByRole("button", { name: "22 問で始める" }).click();
   await expect(page.getByTestId("progress")).toHaveText("1 / 22");
+});
+
+test("間違えた問題とまだ解いていない問題を優先する切り替え", async ({
+  page,
+}) => {
+  await answerOne(page, false, "setup", 49);
+  await page.goto("/#/setup");
+  await selectOnlyRound(page, 49);
+  await expect(page.getByTestId("priority-count")).toContainText(
+    "間違えた問題（復習リスト）1 問・まだ解いていない問題 21 問",
+  );
+  const sw = page.getByRole("switch", {
+    name: "間違えた問題と、まだ解いていない問題を優先する",
+  });
+  await expect(sw).toHaveAttribute("aria-checked", "false");
+  await sw.click();
+  await expect(sw).toHaveAttribute("aria-checked", "true");
+  await page.getByRole("radio", { name: "5問" }).check();
+  await page.getByRole("button", { name: "5 問で始める" }).click();
+  await expect(page.getByTestId("progress")).toHaveText("1 / 5");
+
+  // 次に開いたときもオンのまま
+  await page.goto("/#/setup");
+  await expect(sw).toHaveAttribute("aria-checked", "true");
 });
