@@ -66,10 +66,8 @@
 <svelte:window onkeydown={onKey} />
 
 {#if quiz && question}
-  <div
-    class="flex h-dvh flex-col gap-3 p-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
-  >
-    <header class="flex flex-wrap items-center justify-between gap-2">
+  <AnswerLayout>
+    {#snippet header()}
       <div class="flex items-center gap-3">
         <button class={btn.small} onclick={() => (confirmQuit = true)}
           >中断</button
@@ -81,6 +79,8 @@
           >第{question.round}回 {question.number}番</span
         >
       </div>
+    {/snippet}
+    {#snippet tools()}
       <ToolBar
         {tool}
         canUndo={canUndo(ops)}
@@ -88,52 +88,48 @@
         onUndo={() => activeQuiz.setInk(index, undo(ops))}
         onClear={() => activeQuiz.setInk(index, clearAll(ops))}
       />
-    </header>
-
-    <AnswerLayout>
-      {#snippet text()}
-        <div class="rounded-2xl bg-white p-4 text-2xl md:text-3xl">
-          <FuruText furu={question.furu} yomi={question.yomi} />
-          <p class="mt-3 text-sm text-stone-500">
-            太字の部分を漢字で書きましょう
-          </p>
-        </div>
-      {/snippet}
-      {#snippet canvas()}
-        {#key index}
-          <HandwritingCanvas
-            {ops}
-            {tool}
-            width={tool === "pen"
-              ? PEN_WIDTHS[settings.value.penWidth]
-              : ERASER_WIDTH}
-            penOnly={settings.value.penOnly}
-            onchange={(o) => activeQuiz.setInk(index, o)}
-            label="{index + 1}問目の手書き欄"
-          />
-        {/key}
-      {/snippet}
-    </AnswerLayout>
-
-    <footer
-      class="flex items-center justify-between gap-2 pb-[env(safe-area-inset-bottom)]"
-    >
-      <button
-        class={btn.secondary}
-        disabled={index === 0}
-        onclick={() => activeQuiz.goTo(index - 1)}>前の問題</button
-      >
-      {#if isLast}
-        <button class={btn.primary} onclick={() => toGrading()}
-          >採点へ進む</button
+    {/snippet}
+    {#snippet text()}
+      <div class="rounded-2xl bg-white p-4 text-2xl md:text-3xl">
+        <FuruText furu={question.furu} yomi={question.yomi} />
+        <p class="mt-3 text-sm text-stone-500">
+          太字の部分を漢字で書きましょう
+        </p>
+      </div>
+    {/snippet}
+    {#snippet canvas()}
+      {#key index}
+        <HandwritingCanvas
+          {ops}
+          {tool}
+          width={tool === "pen"
+            ? PEN_WIDTHS[settings.value.penWidth]
+            : ERASER_WIDTH}
+          penOnly={settings.value.penOnly}
+          onchange={(o) => activeQuiz.setInk(index, o)}
+          label="{index + 1}問目の手書き欄"
+        />
+      {/key}
+    {/snippet}
+    {#snippet nav()}
+      <div class="flex items-center justify-between gap-2">
+        <button
+          class={btn.secondary}
+          disabled={index === 0}
+          onclick={() => activeQuiz.goTo(index - 1)}>前の問題</button
         >
-      {:else}
-        <button class={btn.primary} onclick={() => activeQuiz.goTo(index + 1)}
-          >次の問題</button
-        >
-      {/if}
-    </footer>
-  </div>
+        {#if isLast}
+          <button class={btn.primary} onclick={() => toGrading()}
+            >採点へ進む</button
+          >
+        {:else}
+          <button class={btn.primary} onclick={() => activeQuiz.goTo(index + 1)}
+            >次の問題</button
+          >
+        {/if}
+      </div>
+    {/snippet}
+  </AnswerLayout>
 {/if}
 
 <Dialog open={confirmBlank} title="書いていない問題があります">

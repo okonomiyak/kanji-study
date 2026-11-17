@@ -38,3 +38,36 @@ npm run pages:dev                # http://localhost:8788
 ```
 
 Cloudflare 側の設定は [docs/cloudflare-setup.md](docs/cloudflare-setup.md) を参照してください。
+
+## 問題を足す・直す
+
+1. `public/data/questions.json` を編集する（形式は [docs/spec.md](docs/spec.md) の 9.2）。
+   - 回の番号と問題番号（ID `"49-1"` など）は一度決めたら変えない。直すときは中身だけを直す。
+   - `yomi` は `furu` の中にちょうど1回出てくるようにする。
+2. `npm run validate:questions` で検査する（コミット時の pre-commit とビルドでも自動で検査される）。
+3. `main` に push すると Cloudflare Pages が自動でデプロイする。アプリは次に開いたとき（ネットにつながっていれば）新しい問題を読み込む。
+
+## パスワードを変える
+
+Cloudflare の Pages プロジェクト → 設定 → 変数とシークレット で `AUTH_PASSWORD` を変えて再デプロイします。
+全端末のログインを一度に無効にしたいときは `AUTH_SECRET` も変えます。詳しくは [docs/cloudflare-setup.md](docs/cloudflare-setup.md)。
+
+## 使い方のメモ
+
+- iPad / iPhone では Safari の「ホーム画面に追加」から開いて使う（7日間開かないと記録が消える Safari の仕組みを避けるため）。
+- 記録はその端末のブラウザの中だけにある。設定画面からときどき JSON を書き出しておく（7日たつとホームに案内が出る）。
+- キーボード: 解答画面は ←→ で移動、Ctrl/⌘+Z で1つ戻す、E でペン/消しゴム。採点画面は O / X（または 1 / 2）。
+
+## 構成
+
+設計・実装計画書の3章・4章のとおり、`src/` は次の層に分かれています（依存は上から下への一方通行。ESLint で確認）。
+
+| フォルダー                | 役割                                                         |
+| ------------------------- | ------------------------------------------------------------ |
+| `screens/`, `components/` | 画面                                                         |
+| `state/`                  | 画面と保存・ロジックをつなぐ状態（Svelte の runes）          |
+| `storage/`                | IndexedDB と localStorage                                    |
+| `handwriting/`            | 手書きキャンバス                                             |
+| `domain/`                 | 画面にも保存先にも依存しないロジック（復習、統計、統合など） |
+
+`functions/` はログイン用の Cloudflare Pages Functions で、ブラウザ側のコードとは独立しています。
