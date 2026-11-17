@@ -52,11 +52,16 @@ export function sanitizeRange(value: unknown): RangeSpec | null {
     Number.isInteger((r as Record<string, unknown>).round) &&
     Number.isInteger((r as Record<string, unknown>).number);
   if (!Array.isArray(v.spans) || !Array.isArray(v.rounds)) return null;
-  const spans = v.spans.filter(
+  const spans = (v.spans as unknown[]).filter(
     (s): s is RangeSpec["spans"][number] =>
-      typeof s === "object" && s !== null && isRef(s.from) && isRef(s.to),
+      typeof s === "object" &&
+      s !== null &&
+      isRef((s as Record<string, unknown>).from) &&
+      isRef((s as Record<string, unknown>).to),
   );
-  const rounds = v.rounds.filter((r): r is number => Number.isInteger(r));
+  const rounds = (v.rounds as unknown[]).filter((r): r is number =>
+    Number.isInteger(r),
+  );
   return {
     spans: spans.map((s) => ({
       from: { round: s.from.round, number: s.from.number },

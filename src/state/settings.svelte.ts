@@ -5,7 +5,7 @@ class SettingsState {
 
   update(patch: Partial<Settings>) {
     this.value = { ...this.value, ...patch };
-    saveSettings($state.snapshot(this.value) as Settings);
+    saveSettings($state.snapshot(this.value));
   }
 }
 

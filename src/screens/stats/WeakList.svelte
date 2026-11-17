@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatRate } from "../../domain/format";
   import { btn } from "../../components/buttons";
   import { DEFAULT_CONFIG } from "../../domain/config";
   import type { QuestionStats } from "../../domain/stats";
@@ -10,7 +11,6 @@
   }: { items: QuestionStats[]; onstart: (ids: string[]) => void } = $props();
   let selected = $state<string[]>([]);
   const available = $derived(items.filter((s) => s.question));
-  const pct = (r: number) => `${Math.round(r * 100)}%`;
 </script>
 
 {#if available.length}
@@ -47,7 +47,7 @@
             >{s.question?.kanji}</span
           >
           <span class="text-stone-600"
-            >{pct(s.rate)}（{s.correct}/{s.total}、×{s.wrong}）</span
+            >{formatRate(s.rate)}（{s.correct}/{s.total}、×{s.wrong}）</span
           >
           <span class="ml-auto text-sm text-stone-400">{s.questionId}</span>
         </label>

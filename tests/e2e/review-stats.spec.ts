@@ -1,35 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-
-/** 1問だけ出題して、○か×で確定する */
-async function answerOne(
-  page: Page,
-  correct: boolean,
-  from: "setup" | "review" = "setup",
-) {
-  if (from === "setup") {
-    await page.goto("/#/setup");
-    await page.getByRole("button", { name: /第49回/ }).click();
-    await page.getByLabel("自由に決める").check();
-    await page.getByLabel("問題数").fill("1");
-    await page.getByRole("button", { name: "1 問で始める" }).click();
-  } else {
-    await page.goto("/#/review");
-    await page.getByLabel("自由に決める").check();
-    await page.getByLabel("問題数").fill("1");
-    await page.getByRole("button", { name: "1 問で復習を始める" }).click();
-  }
-  await page.getByRole("button", { name: "採点へ進む" }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "採点へ進む" })
-    .click();
-  await page
-    .getByRole("button", { name: correct ? "正解（○）" : "不正解（×）" })
-    .click();
-  await page.getByRole("button", { name: "採点を確定" }).click();
-  await expect(page.getByTestId("score")).toBeVisible();
-  await page.getByRole("button", { name: "ホームへ" }).click();
-}
+import { expect, test } from "@playwright/test";
+import { answerOne } from "./helpers";
 
 test("× で復習リストに入り、3回続けて ○ で外れる。統計にも反映される", async ({
   page,
@@ -55,5 +25,26 @@ test("× で復習リストに入り、3回続けて ○ で外れる。統計�
   );
   await page.getByRole("button", { name: "全部選ぶ" }).click();
   await page.getByRole("button", { name: "選んだ 1 問を出題" }).click();
+  await expect(page.getByTestId("progress")).toHaveText("1 / 1");
+});
+
+test("途中の回があるときに復習を始めると、破棄してよいかを聞く", async ({
+  page,
+}) => {
+  await answerOne(page, false); // 復習リストに1件
+  await page.goto("/#/setup");
+  await page.getByRole("button", { name: /第50回/ }).click();
+  await page.getByRole("button", { name: /問で始める/ }).click();
+  await page.getByRole("button", { name: "中断" }).click();
+  await page.getByRole("button", { name: "あとで再開" }).click();
+
+  await page.getByRole("link", { name: /復習する/ }).click();
+  await page.getByRole("button", { name: /で復習を始める/ }).click();
+  await expect(page.getByRole("dialog")).toContainText("途中の回があります");
+  await page.getByRole("button", { name: "やめる" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  await page.getByRole("button", { name: /で復習を始める/ }).click();
+  await page.getByRole("button", { name: "破棄して始める" }).click();
   await expect(page.getByTestId("progress")).toHaveText("1 / 1");
 });

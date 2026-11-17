@@ -26,8 +26,7 @@
     busy = true;
     try {
       await history.clear();
-      activeQuiz.pending = null;
-      activeQuiz.quiz = null;
+      await activeQuiz.discard();
       ondone("統計データをクリアしました。");
       close();
     } finally {

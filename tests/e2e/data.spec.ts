@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { answerOne } from "./helpers";
 
 test.describe("データ管理", () => {
   test.skip(({ isMobile }) => isMobile, "ダウンロードはPCで確認");
@@ -7,19 +8,7 @@ test.describe("データ管理", () => {
     page,
   }) => {
     // 1問解いて記録を作る
-    await page.goto("/#/setup");
-    await page.getByRole("button", { name: /第50回/ }).click();
-    await page.getByLabel("自由に決める").check();
-    await page.getByLabel("問題数").fill("1");
-    await page.getByRole("button", { name: "1 問で始める" }).click();
-    await page.getByRole("button", { name: "採点へ進む" }).click();
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: "採点へ進む" })
-      .click();
-    await page.getByRole("button", { name: "不正解（×）" }).click();
-    await page.getByRole("button", { name: "採点を確定" }).click();
-    await page.getByRole("button", { name: "ホームへ" }).click();
+    await answerOne(page, false);
 
     // 書き出していないので警告が出る
     await expect(page.getByText("まだJSONを書き出していません")).toBeVisible();
@@ -86,19 +75,7 @@ test.describe("データ管理", () => {
   });
 
   test("書き出しから7日たつとホームに警告が出る", async ({ page }) => {
-    await page.goto("/#/setup");
-    await page.getByRole("button", { name: /第50回/ }).click();
-    await page.getByLabel("自由に決める").check();
-    await page.getByLabel("問題数").fill("1");
-    await page.getByRole("button", { name: "1 問で始める" }).click();
-    await page.getByRole("button", { name: "採点へ進む" }).click();
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: "採点へ進む" })
-      .click();
-    await page.getByRole("button", { name: "正解（○）" }).click();
-    await page.getByRole("button", { name: "採点を確定" }).click();
-    await expect(page.getByTestId("score")).toBeVisible(); // 記録の保存が終わるまで待つ
+    await answerOne(page, true); // 記録の保存が終わるまで待つ
     await page.evaluate(() =>
       localStorage.setItem(
         "kanji-study:last-export-at",

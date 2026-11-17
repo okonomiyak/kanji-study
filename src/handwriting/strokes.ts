@@ -93,12 +93,12 @@ export function sanitizeOps(value: unknown): Op[] {
       typeof o.width === "number" &&
       Array.isArray(o.points)
     ) {
-      const points = o.points.filter(
+      const points = (o.points as unknown[]).filter(
         (p): p is Point =>
           typeof p === "object" &&
           p !== null &&
-          typeof p.x === "number" &&
-          typeof p.y === "number",
+          typeof (p as Record<string, unknown>).x === "number" &&
+          typeof (p as Record<string, unknown>).y === "number",
       );
       out.push({ type: o.type, width: o.width, points });
     }

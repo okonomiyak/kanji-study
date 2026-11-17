@@ -73,5 +73,9 @@ describe("helpers", () => {
     expect(safeNext("/\\evil")).toBe("/");
     expect(safeNext("/login")).toBe("/");
     expect(safeNext(null)).toBe("/");
+    // ブラウザがタブ・改行を取り除くと "//evil.example" になる値
+    expect(safeNext("/\t/evil.example")).toBe("/");
+    expect(safeNext("/\n/evil.example")).toBe("/");
+    expect(safeNext("/ /evil.example")).toBe("/");
   });
 });

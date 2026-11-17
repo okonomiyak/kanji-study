@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { formatRate } from "../../domain/format";
   import { btn } from "../../components/buttons";
   import { shuffle } from "../../domain/random";
-  import { activeQuiz } from "../../state/active-quiz.svelte";
+  import { launcher } from "../../state/launcher.svelte";
   import { history } from "../../state/history.svelte";
   import { questions } from "../../state/questions.svelte";
   import { router } from "../../state/router.svelte";
@@ -9,15 +10,12 @@
   import WeakList from "./WeakList.svelte";
 
   const s = $derived(history.stats(questions.list));
-  const pct = (r: number) => `${Math.round(r * 100)}%`;
   let tab = $state<"weak" | "kanji" | "round">("weak");
 
   /** 選んだ漢字だけで出題（仕様書 5.3） */
   async function startWith(ids: string[]) {
     if (!ids.length) return;
-    if (activeQuiz.pending) activeQuiz.pending = null;
-    await activeQuiz.start(shuffle(ids, Math.random), "normal");
-    router.go("answer");
+    await launcher.launch(shuffle(ids, Math.random), "normal");
   }
 </script>
 
@@ -35,7 +33,7 @@
     <div class="rounded-2xl border border-stone-200 bg-white p-4">
       <p class="text-sm text-stone-500">正答率</p>
       <p class="text-2xl font-bold" data-testid="rate">
-        {s.overall.total ? pct(s.overall.rate) : "—"}
+        {s.overall.total ? formatRate(s.overall.rate) : "—"}
       </p>
     </div>
     <div class="col-span-2 rounded-2xl border border-stone-200 bg-white p-4">
@@ -85,7 +83,7 @@
             <td class="p-2">第{r.round}回</td><td class="p-2">{r.total}</td><td
               class="p-2">{r.correct}</td
             >
-            <td class="p-2">{pct(r.rate)}</td>
+            <td class="p-2">{formatRate(r.rate)}</td>
           </tr>
         {:else}
           <tr

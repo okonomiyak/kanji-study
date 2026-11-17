@@ -4,6 +4,7 @@
   import { wrongQuestionIds } from "../../domain/quiz-session";
   import { shuffle } from "../../domain/random";
   import { activeQuiz } from "../../state/active-quiz.svelte";
+  import { launcher } from "../../state/launcher.svelte";
   import { questions } from "../../state/questions.svelte";
   import { router } from "../../state/router.svelte";
 
@@ -14,19 +15,18 @@
   const total = $derived(quiz?.questionIds.length ?? 0);
 
   $effect(() => {
-    if (!quiz) router.go("home", true);
+    if (activeQuiz.route !== "result") router.go(activeQuiz.route, true);
   });
 
   /** 間違えた問題だけで、すぐに次の回を始める（仕様書 6.2） */
   async function retryWrong() {
     if (!quiz || wrong.length === 0) return;
     const ids = shuffle(wrong, Math.random);
-    await activeQuiz.start(ids, quiz.mode, quiz.range);
-    router.go("answer");
+    await launcher.launch(ids, quiz.mode, quiz.range);
   }
 
   function home() {
-    activeQuiz.quiz = null;
+    activeQuiz.close();
     router.go("home");
   }
 </script>

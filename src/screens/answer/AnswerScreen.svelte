@@ -3,6 +3,7 @@
   import FuruText from "../../components/FuruText.svelte";
   import AnswerLayout from "../../components/layout/AnswerLayout.svelte";
   import { btn } from "../../components/buttons";
+  import { shouldIgnoreKey } from "../../components/keys";
   import HandwritingCanvas from "../../handwriting/HandwritingCanvas.svelte";
   import {
     ERASER_WIDTH,
@@ -33,9 +34,8 @@
   const isLast = $derived(index === total - 1);
 
   $effect(() => {
-    if (!quiz) router.go("home", true);
-    else if (quiz.phase === "grading") router.go("grading", true);
-    else if (quiz.phase === "confirmed") router.go("result", true);
+    // 回の状態と合わない画面に来たら、合う画面へ移す
+    if (activeQuiz.route !== "answer") router.go(activeQuiz.route, true);
   });
 
   async function toGrading(force = false) {
@@ -51,12 +51,12 @@
   }
 
   function onKey(e: KeyboardEvent) {
-    if (confirmBlank || confirmQuit) return;
-    const t = e.target as HTMLElement | null;
-    if (t && ["INPUT", "SELECT", "TEXTAREA"].includes(t.tagName)) return;
+    if (shouldIgnoreKey(e, { allowModifiers: true })) return;
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
       e.preventDefault();
       activeQuiz.setInk(index, undo(ops));
+    } else if (e.ctrlKey || e.metaKey || e.altKey) {
+      return;
     } else if (e.key === "ArrowRight") activeQuiz.goTo(index + 1);
     else if (e.key === "ArrowLeft") activeQuiz.goTo(index - 1);
     else if (e.key === "e") tool = tool === "pen" ? "eraser" : "pen";

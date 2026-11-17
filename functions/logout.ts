@@ -1,7 +1,7 @@
 import type { Env } from "./lib/env";
 import { clearCookieHeader } from "./lib/session-cookie";
 
-export const onRequest: PagesFunction<Env> = async () =>
+export const onRequest: PagesFunction<Env> = () =>
   new Response(null, {
     status: 303,
     headers: {

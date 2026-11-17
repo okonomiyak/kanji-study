@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 /** canvas にペンで横線を1本引く（合成した Pointer Events。端末の種類によらず動く） */
 export async function drawOn(page: Page, selector = "canvas") {
@@ -35,4 +35,35 @@ export async function inkPixels(page: Page, selector = "canvas") {
       for (let i = 3; i < d.length; i += 4) if (d[i]! > 0) n++;
       return n;
     });
+}
+
+/** 1問だけ出題して、○か×で確定する */
+export async function answerOne(
+  page: Page,
+  correct: boolean,
+  from: "setup" | "review" = "setup",
+) {
+  if (from === "setup") {
+    await page.goto("/#/setup");
+    await page.getByRole("button", { name: /第49回/ }).click();
+    await page.getByLabel("自由に決める").check();
+    await page.getByLabel("問題数").fill("1");
+    await page.getByRole("button", { name: "1 問で始める" }).click();
+  } else {
+    await page.goto("/#/review");
+    await page.getByLabel("自由に決める").check();
+    await page.getByLabel("問題数").fill("1");
+    await page.getByRole("button", { name: "1 問で復習を始める" }).click();
+  }
+  await page.getByRole("button", { name: "採点へ進む" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "採点へ進む" })
+    .click();
+  await page
+    .getByRole("button", { name: correct ? "正解（○）" : "不正解（×）" })
+    .click();
+  await page.getByRole("button", { name: "採点を確定" }).click();
+  await expect(page.getByTestId("score")).toBeVisible();
+  await page.getByRole("button", { name: "ホームへ" }).click();
 }

@@ -1,13 +1,11 @@
 <script lang="ts">
   import CountPicker from "../../components/CountPicker.svelte";
-  import Dialog from "../../components/Dialog.svelte";
   import { btn } from "../../components/buttons";
   import { pickRandom } from "../../domain/picker";
   import { EMPTY_RANGE, describeRange, resolveRange } from "../../domain/range";
   import type { RangeSpec } from "../../domain/types";
-  import { activeQuiz } from "../../state/active-quiz.svelte";
+  import { launcher } from "../../state/launcher.svelte";
   import { questions } from "../../state/questions.svelte";
-  import { router } from "../../state/router.svelte";
   import { settings } from "../../state/settings.svelte";
   import RangePicker from "./RangePicker.svelte";
 
@@ -15,34 +13,19 @@
     structuredClone($state.snapshot(settings.value.lastRange) ?? EMPTY_RANGE),
   );
   let wanted = $state(settings.value.lastCount);
-  let confirmReplace = $state(false);
 
   const ids = $derived(resolveRange(questions.list, range));
   const count = $derived(Math.min(wanted, ids.length));
-  const hasActive = $derived(
-    (activeQuiz.quiz !== null && activeQuiz.quiz.phase !== "confirmed") ||
-      activeQuiz.pending !== null,
-  );
 
-  async function start(force = false) {
+  async function start() {
     if (count === 0) return;
-    if (hasActive && !force) {
-      confirmReplace = true;
-      return;
-    }
-    confirmReplace = false;
-    if (hasActive) {
-      await activeQuiz.discard();
-      activeQuiz.pending = null;
-    }
     const snapshot = $state.snapshot(range) as RangeSpec;
     settings.update({ lastRange: snapshot, lastCount: wanted });
-    await activeQuiz.start(
+    await launcher.launch(
       pickRandom(ids, count, Math.random),
       "normal",
       snapshot,
     );
-    router.go("answer");
   }
 </script>
 
@@ -80,15 +63,3 @@
     </button>
   </div>
 </div>
-
-<Dialog open={confirmReplace} title="途中の回があります">
-  採点が終わっていない回があります。破棄して新しく始めますか？（破棄した回は統計に記録されません）
-  {#snippet actions()}
-    <button class={btn.secondary} onclick={() => (confirmReplace = false)}
-      >やめる</button
-    >
-    <button class={btn.danger} onclick={() => start(true)}
-      >破棄して始める</button
-    >
-  {/snippet}
-</Dialog>

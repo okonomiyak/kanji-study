@@ -69,6 +69,8 @@ class ActiveQuiz {
   }
 
   async start(questionIds: QuestionId[], mode: Mode, range?: RangeSpec) {
+    this.cancelTimer();
+    this.pending = null;
     this.quiz = startQuiz({
       sessionId: newId(),
       mode,
@@ -109,6 +111,14 @@ class ActiveQuiz {
     this.scheduleSave();
   }
 
+  /** 採点が終わっていない回（中断中を含む）があるか */
+  get hasUnfinished(): boolean {
+    return (
+      (this.quiz !== null && this.quiz.phase !== "confirmed") ||
+      this.pending !== null
+    );
+  }
+
   get canConfirm() {
     return this.quiz ? canConfirm(this.quiz) : false;
   }
@@ -125,11 +135,26 @@ class ActiveQuiz {
     return true;
   }
 
-  /** 回を破棄する（統計に記録しない） */
-  async discard() {
+  /** 画面に出している回を閉じる（保存先は変えない。結果画面から戻るときやクリアの後） */
+  close() {
     this.cancelTimer();
     this.quiz = null;
     this.inks = [];
+  }
+
+  /** 今の回の状態に合う画面 */
+  get route(): "home" | "answer" | "grading" | "result" {
+    const phase = this.quiz?.phase;
+    if (phase === "answering") return "answer";
+    if (phase === "grading") return "grading";
+    if (phase === "confirmed") return "result";
+    return "home";
+  }
+
+  /** 回を破棄する（統計に記録しない）。中断中の回も消える */
+  async discard() {
+    this.close();
+    this.pending = null;
     await deleteDraft();
   }
 

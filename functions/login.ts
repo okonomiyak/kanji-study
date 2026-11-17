@@ -13,16 +13,20 @@ const HTML_HEADERS = {
   "X-Robots-Tag": "noindex, nofollow",
 };
 
-export const onRequestGet: PagesFunction<Env> = async ({ request }) => {
+export const onRequestGet: PagesFunction<Env> = ({ request }) => {
   const next = safeNext(new URL(request.url).searchParams.get("next"));
   return new Response(loginPage({ next }), { headers: HTML_HEADERS });
 };
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const form = await request.formData();
-  const username = String(form.get("username") ?? "");
-  const password = String(form.get("password") ?? "");
-  const next = safeNext(String(form.get("next") ?? "/"));
+  const field = (name: string) => {
+    const v = form.get(name);
+    return typeof v === "string" ? v : ""; // ファイルなど文字列以外は空として扱う
+  };
+  const username = field("username");
+  const password = field("password");
+  const next = safeNext(field("next"));
 
   if (!authConfigured(env)) {
     return new Response(

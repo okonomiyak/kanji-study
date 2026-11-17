@@ -11,6 +11,7 @@ import { getDB, resetDBConnection } from "../../src/storage/db";
 import {
   deleteDraft,
   loadDraft,
+  sanitizeDraft,
   saveDraft,
 } from "../../src/storage/drafts-repo";
 import {
@@ -97,6 +98,25 @@ describe("IndexedDB", () => {
     expect((await loadDraft())?.inks).toEqual([[], []]);
     await deleteDraft();
     expect(await loadDraft()).toBeNull();
+  });
+});
+
+describe("下書きの検査", () => {
+  it("位置と採点の長さをそろえ、壊れたものは捨てる", () => {
+    const q = quiz();
+    const d = sanitizeDraft({
+      quiz: { ...q, index: 9, grades: [true] },
+      inks: null,
+      savedAt: 1,
+    });
+    expect(d?.quiz.index).toBe(1);
+    expect(d?.quiz.grades).toEqual([true, null]);
+    expect(d?.inks).toEqual([[], []]);
+    expect(d?.savedAt).toBe("");
+    expect(sanitizeDraft({ quiz: { ...q, phase: "confirmed" } })).toBeNull();
+    expect(sanitizeDraft({ quiz: { ...q, questionIds: [] } })).toBeNull();
+    expect(sanitizeDraft({ quiz: { ...q, mode: "x" } })).toBeNull();
+    expect(sanitizeDraft(null)).toBeNull();
   });
 });
 

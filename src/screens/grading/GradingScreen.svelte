@@ -1,5 +1,6 @@
 <script lang="ts">
   import { btn } from "../../components/buttons";
+  import { shouldIgnoreKey } from "../../components/keys";
   import { activeQuiz } from "../../state/active-quiz.svelte";
   import { questions } from "../../state/questions.svelte";
   import { router } from "../../state/router.svelte";
@@ -16,9 +17,7 @@
   let error = $state("");
 
   $effect(() => {
-    if (!quiz) router.go("home", true);
-    else if (quiz.phase === "answering") router.go("answer", true);
-    else if (quiz.phase === "confirmed") router.go("result", true);
+    if (activeQuiz.route !== "grading") router.go(activeQuiz.route, true);
   });
 
   function mark(correct: boolean) {
@@ -47,6 +46,7 @@
   }
 
   function onKey(e: KeyboardEvent) {
+    if (shouldIgnoreKey(e)) return;
     if (e.key === "o" || e.key === "1") mark(true);
     else if (e.key === "x" || e.key === "2") mark(false);
     else if (e.key === "ArrowRight") activeQuiz.goTo(index + 1);

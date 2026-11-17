@@ -1,17 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-
-/** canvas に描かれた（透明でない）画素の数 */
-async function inkPixels(page: Page) {
-  return page
-    .locator("canvas")
-    .first()
-    .evaluate((c: HTMLCanvasElement) => {
-      const d = c.getContext("2d")!.getImageData(0, 0, c.width, c.height).data;
-      let n = 0;
-      for (let i = 3; i < d.length; i += 4) if (d[i]! > 0) n++;
-      return n;
-    });
-}
+import { inkPixels } from "./helpers";
 
 async function drawLine(page: Page) {
   const box = (await page.locator("canvas").first().boundingBox())!;

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatRate } from "../../domain/format";
   import type { QuestionStats } from "../../domain/stats";
 
   let { items }: { items: QuestionStats[] } = $props();
@@ -8,7 +9,6 @@
       ? [...items].sort((a, b) => a.rate - b.rate || b.wrong - a.wrong)
       : items,
   );
-  const pct = (r: number) => `${Math.round(r * 100)}%`;
 </script>
 
 <div class="mb-2 flex gap-3 text-sm">
@@ -38,7 +38,7 @@
           >
           <td class="p-2">{s.total}</td>
           <td class="p-2">{s.correct}</td>
-          <td class="p-2">{pct(s.rate)}</td>
+          <td class="p-2">{formatRate(s.rate)}</td>
           <td class="p-2 tracking-wider">
             {#each s.history.slice(-10) as h, i (i)}<span
                 class={h ? "text-emerald-700" : "text-red-700"}

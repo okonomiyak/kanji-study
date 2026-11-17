@@ -87,12 +87,11 @@ export function clearCookieHeader(): string {
 
 /** ログイン後の戻り先。外部サイトへ飛ばされないよう、同じサイト内のパスだけを許す。 */
 export function safeNext(next: string | null | undefined): string {
-  if (
-    !next ||
-    !next.startsWith("/") ||
-    next.startsWith("//") ||
-    next.startsWith("/\\")
-  )
+  // ブラウザは URL 中のタブ・改行を取り除くため、"/\t/evil" は "//evil" として扱われる。
+  // 空白や制御文字を含む値は受け付けない（外部サイトへの転送を防ぐ）。
+  // eslint-disable-next-line no-control-regex
+  if (!next || /[\s\u0000-\u001f\u007f]/.test(next)) return "/";
+  if (!next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\"))
     return "/";
   if (next.startsWith("/login") || next.startsWith("/logout")) return "/";
   return next;

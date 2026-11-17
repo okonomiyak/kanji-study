@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import Dialog from "./components/Dialog.svelte";
   import { btn } from "./components/buttons";
   import AnswerScreen from "./screens/answer/AnswerScreen.svelte";
   import GradingScreen from "./screens/grading/GradingScreen.svelte";
@@ -12,6 +13,7 @@
   import TrialScreen from "./screens/trial/TrialScreen.svelte";
   import { activeQuiz } from "./state/active-quiz.svelte";
   import { history } from "./state/history.svelte";
+  import { launcher } from "./state/launcher.svelte";
   import { questions } from "./state/questions.svelte";
   import { router } from "./state/router.svelte";
   import { requestPersist } from "./storage/persist";
@@ -68,3 +70,15 @@
 {:else}
   <HomeScreen />
 {/if}
+
+<Dialog open={launcher.waiting !== null} title="途中の回があります">
+  採点が終わっていない回があります。破棄して新しく始めますか？（破棄した回は統計に記録されません）
+  {#snippet actions()}
+    <button class={btn.secondary} onclick={() => launcher.cancel()}
+      >やめる</button
+    >
+    <button class={btn.danger} onclick={() => launcher.confirm()}
+      >破棄して始める</button
+    >
+  {/snippet}
+</Dialog>

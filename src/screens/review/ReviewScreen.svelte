@@ -2,9 +2,8 @@
   import CountPicker from "../../components/CountPicker.svelte";
   import { btn } from "../../components/buttons";
   import { pickReview } from "../../domain/picker";
-  import { activeQuiz } from "../../state/active-quiz.svelte";
   import { history } from "../../state/history.svelte";
-  import { router } from "../../state/router.svelte";
+  import { launcher } from "../../state/launcher.svelte";
   import { settings } from "../../state/settings.svelte";
 
   /** 復習の出題（仕様書 6.3）。連続正解の少ないもの、間違いの多いものを優先 */
@@ -14,9 +13,7 @@
 
   async function start() {
     if (count === 0) return;
-    if (activeQuiz.pending) activeQuiz.pending = null;
-    await activeQuiz.start(pickReview(entries, count, Math.random), "review");
-    router.go("answer");
+    await launcher.launch(pickReview(entries, count, Math.random), "review");
   }
 </script>
 

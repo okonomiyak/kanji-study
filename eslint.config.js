@@ -7,6 +7,8 @@ const restrict = (patterns) => ({
   "no-restricted-imports": ["error", { patterns }],
 });
 
+const TYPED = ["src/**/*.ts", "functions/**/*.ts", "scripts/**/*.ts"];
+
 export default ts.config(
   { ignores: ["dist/", ".wrangler/", "node_modules/", "coverage/"] },
   js.configs.recommended,
@@ -14,6 +16,17 @@ export default ts.config(
   ...svelte.configs.recommended,
   {
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
+  },
+  // 型情報を使った静的解析（Promise の放置、any の取り扱いなど）
+  ...ts.configs.recommendedTypeChecked.map((c) => ({ ...c, files: TYPED })),
+  {
+    files: TYPED,
+    languageOptions: {
+      parserOptions: {
+        project: ["./tsconfig.json", "./tsconfig.node.json"],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
   },
   {
     files: ["**/*.svelte", "**/*.svelte.ts"],
