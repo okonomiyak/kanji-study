@@ -90,11 +90,14 @@
       />
     {/snippet}
     {#snippet text()}
-      <div class="rounded-2xl bg-white p-4 text-2xl md:text-3xl">
-        <FuruText furu={question.furu} yomi={question.yomi} />
-        <p class="mt-3 text-sm text-stone-500">
-          太字の部分を漢字で書きましょう
-        </p>
+      <div class="flex h-full flex-col gap-2 rounded-2xl bg-white p-4">
+        <FuruText
+          furu={question.furu}
+          yomi={question.yomi}
+          vertical
+          class="min-h-0 flex-1 text-2xl md:text-3xl [@media(max-height:500px)]:text-lg"
+        />
+        <p class="text-sm text-stone-500">太字の部分を漢字で書きましょう</p>
       </div>
     {/snippet}
     {#snippet canvas()}

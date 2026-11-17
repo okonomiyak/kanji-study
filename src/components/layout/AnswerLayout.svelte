@@ -3,7 +3,7 @@
 
   /**
    * 解答画面の並び（仕様書 3.4）。
-   * 縦向き: 上から「見出し・道具・本文・キャンバス・移動ボタン」。
+   * 縦向き: 上から「見出し・道具・本文・キャンバス・移動ボタン」。本文は縦書きなので高さを決めておく。
    * 横向き: キャンバスを左に高さいっぱいで置き、右の列に見出し・道具・本文・移動ボタンをまとめる。
    */
   interface Props {
@@ -26,7 +26,7 @@
     {@render tools()}
   </div>
   <div
-    class="overflow-auto portrait:max-h-[30%] landscape:col-start-2 landscape:row-start-3 landscape:self-center"
+    class="min-h-0 portrait:h-[28%] portrait:shrink-0 landscape:col-start-2 landscape:row-start-3"
   >
     {@render text()}
   </div>

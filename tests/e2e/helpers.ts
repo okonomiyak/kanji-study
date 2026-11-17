@@ -37,15 +37,21 @@ export async function inkPixels(page: Page, selector = "canvas") {
     });
 }
 
-/** 1問だけ出題して、○か×で確定する */
+/** 1問だけ（出題画面からなら指定の回だけを範囲にして）出題し、○か×で確定する */
 export async function answerOne(
   page: Page,
   correct: boolean,
   from: "setup" | "review" = "setup",
+  round = 49,
 ) {
   if (from === "setup") {
     await page.goto("/#/setup");
-    await page.getByRole("button", { name: /第49回/ }).click();
+    // 前回の範囲が残っているので、一度すべて外してから指定の回だけを選ぶ
+    const pressed = page.locator('button[aria-pressed="true"]');
+    while ((await pressed.count()) > 0) await pressed.first().click();
+    await page
+      .getByRole("button", { name: new RegExp(`第${round}回`) })
+      .click();
     await page.getByLabel("自由に決める").check();
     await page.getByLabel("問題数").fill("1");
     await page.getByRole("button", { name: "1 問で始める" }).click();

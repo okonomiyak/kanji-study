@@ -135,3 +135,24 @@ export function weakQuestions(
         a.questionId.localeCompare(b.questionId),
     );
 }
+
+export type StatsSortKey = "order" | "rate" | "correct" | "wrong" | "total";
+export type SortDir = "asc" | "desc";
+
+/**
+ * 漢字ごとの統計を並べ替える。items は問題の順に並んでいるものとし、
+ * 同じ値どうしは問題の順のまま（安定ソート）。
+ */
+export function sortQuestionStats(
+  items: readonly QuestionStats[],
+  key: StatsSortKey,
+  dir: SortDir,
+): QuestionStats[] {
+  const sign = dir === "asc" ? 1 : -1;
+  const indexed = items.map((s, i) => ({ s, i }));
+  indexed.sort((a, b) => {
+    const d = key === "order" ? a.i - b.i : a.s[key] - b.s[key];
+    return d !== 0 ? sign * d : a.i - b.i;
+  });
+  return indexed.map(({ s }) => s);
+}

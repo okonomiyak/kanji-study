@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   overallStats,
+  sortQuestionStats,
   statsByQuestion,
   statsByRound,
   weakQuestions,
@@ -72,5 +73,20 @@ describe("統計", () => {
     );
     // 49-2: 0/2, 49-10: 2/4（間違い2）, 49-1: 1/2（間違い1）, 50-1: 1/2（間違い1）。49-5 は1回なので除く
     expect(weak).toEqual(["49-2", "49-10", "49-1", "50-1"]);
+  });
+
+  it("漢字ごとの並べ替え: 正答率・回数、同じ値は問題の順、逆順も", () => {
+    const s = statsByQuestion(a, qs);
+    const ids = (
+      k: Parameters<typeof sortQuestionStats>[1],
+      d: "asc" | "desc",
+    ) => sortQuestionStats(s, k, d).map((x) => x.questionId);
+    expect(ids("order", "asc")).toEqual(["49-1", "49-2", "50-1", "99-1"]);
+    expect(ids("order", "desc")).toEqual(["99-1", "50-1", "49-2", "49-1"]);
+    expect(ids("rate", "asc")).toEqual(["49-2", "49-1", "50-1", "99-1"]);
+    expect(ids("rate", "desc")).toEqual(["99-1", "49-1", "50-1", "49-2"]);
+    expect(ids("wrong", "desc")).toEqual(["49-2", "49-1", "50-1", "99-1"]);
+    expect(ids("total", "asc")).toEqual(["99-1", "49-1", "49-2", "50-1"]);
+    expect(s.map((x) => x.questionId)).toEqual(ids("order", "asc")); // 元は変えない
   });
 });

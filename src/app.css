@@ -1,12 +1,29 @@
 @import "tailwindcss";
 
+@theme {
+  /* 漢字の表示は明朝。縦書きでも字の送りが正しいように日本語のフォントを先に並べる */
+  --font-serif:
+    "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", "Noto Serif CJK JP",
+    ui-serif, serif;
+}
+
 html,
 body {
   height: 100%;
   background: #fafaf9;
   color: #1c1917;
   font-family:
-    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui,
-    sans-serif;
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "Noto Sans CJK JP", "Yu Gothic", system-ui, sans-serif;
   -webkit-text-size-adjust: 100%;
+}
+
+/* 縦書き（出題・採点の本文と意味）。行は右から左へ進み、はみ出したら横にスクロールする */
+.tategaki {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  line-break: strict;
+  max-height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
 }

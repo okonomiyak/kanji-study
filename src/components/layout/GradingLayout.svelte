@@ -3,7 +3,8 @@
 
   /**
    * 採点画面の並び（仕様書 3.4、4.1）。基本は「意味・漢字と手書き・本文」の3列。
-   * スマホ縦向きだけ「本文 → 漢字と手書き（横並び） → 意味」の縦積み。
+   * 本文と意味は縦書きなので、各列は高さいっぱいに伸ばす。
+   * スマホ縦向きだけ、上の段に「意味（左）・本文（右）」、下の段に「漢字と手書き（横並び）」。
    */
   let {
     meaning,
@@ -13,13 +14,21 @@
 </script>
 
 <div
-  class="grid min-h-0 flex-1 grid-cols-[1fr_auto_1fr] items-center gap-3 max-md:portrait:flex max-md:portrait:flex-col max-md:portrait:items-stretch"
+  class="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-[minmax(0,1fr)] gap-3 max-md:portrait:grid-cols-2 max-md:portrait:grid-rows-[minmax(0,1fr)_auto]"
 >
-  <section class="max-md:portrait:order-3">{@render meaning()}</section>
   <section
-    class="flex flex-col items-center gap-2 max-md:portrait:order-2 max-md:portrait:flex-row max-md:portrait:justify-center"
+    class="min-h-0 max-md:portrait:col-start-1 max-md:portrait:row-start-1"
+  >
+    {@render meaning()}
+  </section>
+  <section
+    class="flex flex-col items-center justify-center gap-2 max-md:portrait:col-span-2 max-md:portrait:row-start-2 max-md:portrait:flex-row"
   >
     {@render answer()}
   </section>
-  <section class="max-md:portrait:order-1">{@render text()}</section>
+  <section
+    class="min-h-0 max-md:portrait:col-start-2 max-md:portrait:row-start-1"
+  >
+    {@render text()}
+  </section>
 </div>
