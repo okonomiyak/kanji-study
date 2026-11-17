@@ -8,7 +8,13 @@ import {
 } from "../domain/stats";
 import type { Question } from "../domain/types";
 import type { Attempt, Session } from "../domain/types";
-import { commitSession, loadHistory } from "../storage/attempts-repo";
+import type { MergePlan } from "../domain/backup";
+import {
+  addRecords,
+  clearHistory,
+  commitSession,
+  loadHistory,
+} from "../storage/attempts-repo";
 
 /** 解答記録の保持と、復習の派生値（設計計画書 4.2 state） */
 class HistoryState {
@@ -38,6 +44,20 @@ class HistoryState {
     this.attempts = h.attempts;
     this.sessions = h.sessions;
     this.loaded = true;
+  }
+
+  /** JSONの統合（仕様書 7.4）。planMerge で重複を除いたものだけを足す */
+  async merge(plan: MergePlan) {
+    await addRecords(plan.newSessions, plan.newAttempts);
+    this.attempts = [...this.attempts, ...plan.newAttempts];
+    this.sessions = [...this.sessions, ...plan.newSessions];
+  }
+
+  /** 統計データをクリア（仕様書 7.7）。未完了の回の手書きも消える */
+  async clear() {
+    await clearHistory();
+    this.attempts = [];
+    this.sessions = [];
   }
 
   /** 採点の確定を保存して反映する */
