@@ -134,18 +134,20 @@ describe("問題数", () => {
 
 describe("間違えた問題・まだ解いていない問題を優先", () => {
   const ids = Array.from({ length: 20 }, (_, i) => `49-${i + 1}`);
-  const review = new Set(["49-3", "49-7"]);
-  const answered = new Set(ids.slice(0, 15)); // 49-16〜49-20 は未回答
+  // 49-1〜49-15 は解答済み。49-3 と 49-7 は最後が ×（49-5 は × のあと ○ なので含まない）
+  const latest = new Map(ids.slice(0, 15).map((id) => [id, true]));
+  latest.set("49-3", false);
+  latest.set("49-7", false);
 
   it("優先する問題を分ける", () => {
-    expect(priorityIds(ids, review, answered)).toEqual({
+    expect(priorityIds(ids, latest)).toEqual({
       wrong: ["49-3", "49-7"],
       unanswered: ["49-16", "49-17", "49-18", "49-19", "49-20"],
     });
   });
 
   it("優先する問題から先に選び、足りない分を残りから選ぶ", () => {
-    const { wrong, unanswered } = priorityIds(ids, review, answered);
+    const { wrong, unanswered } = priorityIds(ids, latest);
     const priority = new Set([...wrong, ...unanswered]);
     for (let seed = 1; seed <= 20; seed++) {
       const five = pickPrioritized(ids, 5, priority, seededRng(seed));
