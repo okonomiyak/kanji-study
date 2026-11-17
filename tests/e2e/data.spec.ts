@@ -98,6 +98,7 @@ test.describe("データ管理", () => {
       .click();
     await page.getByRole("button", { name: "正解（○）" }).click();
     await page.getByRole("button", { name: "採点を確定" }).click();
+    await expect(page.getByTestId("score")).toBeVisible(); // 記録の保存が終わるまで待つ
     await page.evaluate(() =>
       localStorage.setItem(
         "kanji-study:last-export-at",
