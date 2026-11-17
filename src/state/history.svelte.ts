@@ -1,5 +1,12 @@
 import { DEFAULT_CONFIG } from "../domain/config";
 import { computeReview, reviewBreakdown } from "../domain/review";
+import {
+  overallStats,
+  statsByQuestion,
+  statsByRound,
+  weakQuestions,
+} from "../domain/stats";
+import type { Question } from "../domain/types";
 import type { Attempt, Session } from "../domain/types";
 import { commitSession, loadHistory } from "../storage/attempts-repo";
 
@@ -14,6 +21,17 @@ class HistoryState {
   breakdown = $derived(
     reviewBreakdown(this.review, DEFAULT_CONFIG.graduateStreak),
   );
+
+  /** 統計（仕様書 5.3）。問題データを受け取って計算する */
+  stats(questions: readonly Question[]) {
+    const byQuestion = statsByQuestion(this.attempts, questions);
+    return {
+      byQuestion,
+      byRound: statsByRound(this.attempts),
+      overall: overallStats(this.attempts),
+      weak: weakQuestions(byQuestion, DEFAULT_CONFIG.weakMinAttempts),
+    };
+  }
 
   async load() {
     const h = await loadHistory();

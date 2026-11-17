@@ -1,4 +1,4 @@
-/** 時差つきのISO 8601（例: 2026-11-17T13:45:00+09:00） */
+/** 時差つきのISO 8601（例: 2026-11-17T13:45:00.123+09:00）。同じ秒の記録の順番が崩れないようミリ秒まで持つ */
 export function toLocalIso(date: Date): string {
   const pad = (n: number) => String(Math.abs(n)).padStart(2, "0");
   const off = -date.getTimezoneOffset();
@@ -6,6 +6,7 @@ export function toLocalIso(date: Date): string {
   return (
     `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
     `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}` +
+    `.${String(date.getMilliseconds()).padStart(3, "0")}` +
     `${sign}${pad(Math.trunc(off / 60))}:${pad(off % 60)}`
   );
 }

@@ -2,6 +2,7 @@
 export const ROUTES = [
   "home",
   "setup",
+  "review",
   "answer",
   "grading",
   "result",

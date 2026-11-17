@@ -6,7 +6,7 @@ describe("time", () => {
     const d = new Date(Date.UTC(2026, 10, 17, 4, 45, 0));
     expect(Date.parse(toLocalIso(d))).toBe(d.getTime());
     expect(toLocalIso(d)).toMatch(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/,
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}[+-]\d{2}:\d{2}$/,
     );
     expect(localDate(d)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });

@@ -71,6 +71,12 @@
 
   <div class="grid gap-3">
     <a href="#/setup" class="{btn.primary} min-h-16 text-xl">出題する</a>
+    <a href="#/review" class="{btn.secondary} min-h-16 text-xl">
+      復習する<span class="ml-2 text-base text-stone-500"
+        >（{history.review.size}件）</span
+      >
+    </a>
+    <a href="#/stats" class="{btn.secondary} min-h-14">統計</a>
   </div>
 
   <section class="rounded-2xl border border-stone-200 bg-white p-4">
