@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  allRoundsRange,
   describeRange,
   resolveRange,
   sanitizeRange,
 } from "../../src/domain/range";
 import {
   ALL_QUESTIONS,
+  pickPrioritized,
   pickRandom,
+  priorityIds,
   pickReview,
   resolveCount,
 } from "../../src/domain/picker";
@@ -126,5 +129,41 @@ describe("問題数", () => {
     expect(resolveCount(100, 42)).toBe(42);
     expect(resolveCount(10, 42)).toBe(10);
     expect(resolveCount(10, 0)).toBe(0);
+  });
+});
+
+describe("間違えた問題・まだ解いていない問題を優先", () => {
+  const ids = Array.from({ length: 20 }, (_, i) => `49-${i + 1}`);
+  const review = new Set(["49-3", "49-7"]);
+  const answered = new Set(ids.slice(0, 15)); // 49-16〜49-20 は未回答
+
+  it("優先する問題を分ける", () => {
+    expect(priorityIds(ids, review, answered)).toEqual({
+      wrong: ["49-3", "49-7"],
+      unanswered: ["49-16", "49-17", "49-18", "49-19", "49-20"],
+    });
+  });
+
+  it("優先する問題から先に選び、足りない分を残りから選ぶ", () => {
+    const { wrong, unanswered } = priorityIds(ids, review, answered);
+    const priority = new Set([...wrong, ...unanswered]);
+    for (let seed = 1; seed <= 20; seed++) {
+      const five = pickPrioritized(ids, 5, priority, seededRng(seed));
+      expect(five).toHaveLength(5);
+      expect(five.every((id) => priority.has(id))).toBe(true);
+      const ten = pickPrioritized(ids, 10, priority, seededRng(seed));
+      expect(new Set(ten).size).toBe(10);
+      expect([...priority].every((id) => ten.includes(id))).toBe(true);
+    }
+    expect(pickPrioritized(ids, 100, priority, seededRng(1))).toHaveLength(20);
+  });
+});
+
+describe("すべての回", () => {
+  it("問題に出てくる回をすべて選ぶ", () => {
+    const qs = loadFixtureQuestions();
+    const r = allRoundsRange(qs);
+    expect(r.spans).toEqual([]);
+    expect(resolveRange(qs, r)).toHaveLength(qs.length);
   });
 });

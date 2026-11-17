@@ -2,12 +2,19 @@
   import FuruText from "../../components/FuruText.svelte";
   import AnswerLayout from "../../components/layout/AnswerLayout.svelte";
   import { btn } from "../../components/buttons";
-  import { shouldIgnoreKey } from "../../components/keys";
+  import { inkShortcut, shouldIgnoreKey } from "../../components/keys";
   import {
     practiceQuestions,
     type PracticeSource,
   } from "../../domain/practice";
+  import {
+    allRoundsRange,
+    describeRange,
+    resolveRange,
+  } from "../../domain/range";
   import { shuffle } from "../../domain/random";
+  import type { RangeSpec } from "../../domain/types";
+  import RangePicker from "../setup/RangePicker.svelte";
   import HandwritingCanvas from "../../handwriting/HandwritingCanvas.svelte";
   import {
     ERASER_WIDTH,
@@ -19,7 +26,10 @@
     type Op,
     type Tool,
   } from "../../handwriting/strokes";
+  import { onDestroy } from "svelte";
   import { history } from "../../state/history.svelte";
+  import { launcher } from "../../state/launcher.svelte";
+  import { practicePlan } from "../../state/practice-plan.svelte";
   import { questions } from "../../state/questions.svelte";
   import { settings } from "../../state/settings.svelte";
   import ToolBar from "../answer/ToolBar.svelte";
@@ -27,6 +37,7 @@
   /**
    * 間違えた問題の練習。例文と正しい漢字を見ながら書く。漢字は隠したり出したりできる。
    * 採点も記録もしないので、復習リストや統計は変わらない。手書きも保存しない。
+   * 結果画面から来たとき（practicePlan がある）は、その回で間違えた問題だけを練習し、最後に解き直す。
    */
   let source = $state<PracticeSource>("review");
   let shuffled = $state(false);
@@ -45,8 +56,34 @@
   const missedList = $derived(
     practiceQuestions(questions.list, history.review, stats, "missed"),
   );
+  // 結果画面から来たときの予定（画面を開いたときのものを使い、離れたら消す）
+  const plan = practicePlan.current;
+  onDestroy(() => practicePlan.clear());
+  const planList = plan
+    ? plan.questionIds
+        .map((id) => questions.get(id))
+        .filter((q) => q !== undefined)
+    : [];
+
+  async function finishAndRetry() {
+    if (!plan) return;
+    await launcher.launch(
+      plan.retry.questionIds,
+      plan.retry.mode,
+      plan.retry.range,
+    );
+  }
+
+  // 範囲。null は「すべての回」（対象を切り替えたら戻す）
+  let chosen = $state.raw<RangeSpec | null>(null);
+  let rangeOpen = $state(false);
+  const sourceList = $derived(source === "review" ? reviewList : missedList);
+  const range = $derived(chosen ?? allRoundsRange(sourceList));
+
   const list = $derived.by(() => {
-    const base = source === "review" ? reviewList : missedList;
+    if (plan) return planList;
+    const ids = new Set(resolveRange(sourceList, range));
+    const base = sourceList.filter((q) => ids.has(q.id));
     if (!shuffled) return base;
     void seed;
     return shuffle(base, Math.random);
@@ -78,19 +115,18 @@
 
   function onKey(e: KeyboardEvent) {
     if (shouldIgnoreKey(e, { allowModifiers: true })) return;
-    const k = e.key.toLowerCase();
-    if ((e.ctrlKey || e.metaKey) && (k === "y" || (k === "z" && e.shiftKey))) {
+    const shortcut = inkShortcut(e);
+    if (shortcut) {
       e.preventDefault();
-      redoInk();
-    } else if ((e.ctrlKey || e.metaKey) && k === "z") {
-      e.preventDefault();
-      undoInk();
+      if (shortcut === "undo") undoInk();
+      else redoInk();
     } else if (e.ctrlKey || e.metaKey || e.altKey) {
       return;
     } else if (e.key === "ArrowRight") goTo(index + 1);
     else if (e.key === "ArrowLeft") goTo(index - 1);
-    else if (k === "h") hidden = !hidden;
-    else if (k === "e") tool = tool === "pen" ? "eraser" : "pen";
+    else if (e.key.toLowerCase() === "h") hidden = !hidden;
+    else if (e.key.toLowerCase() === "e")
+      tool = tool === "pen" ? "eraser" : "pen";
   }
 </script>
 
@@ -106,7 +142,10 @@
       aria-label="練習する問題"
       value={source}
       onchange={(e) =>
-        changeList(() => (source = e.currentTarget.value as PracticeSource))}
+        changeList(() => {
+          source = e.currentTarget.value as PracticeSource;
+          chosen = null;
+        })}
     >
       <option value="review">復習リスト（{reviewList.length}問）</option>
       <option value="missed"
@@ -127,6 +166,18 @@
       順番をばらばらに
     </label>
   </div>
+  <details class="text-sm" data-testid="practice-range" bind:open={rangeOpen}>
+    <summary class="min-h-9 cursor-pointer py-1">
+      範囲: {describeRange(range)}（{list.length}問）
+    </summary>
+    <div class="mt-2 rounded-xl border border-stone-200 bg-white p-3">
+      <RangePicker
+        questions={sourceList}
+        {range}
+        onchange={(r) => changeList(() => (chosen = r))}
+      />
+    </div>
+  </details>
 {/snippet}
 
 {#if question}
@@ -145,7 +196,13 @@
             >第{question.round}回 {question.number}番</span
           >
         </div>
-        {@render sourcePicker()}
+        {#if plan}
+          <p class="text-sm text-stone-600" data-testid="practice-plan">
+            この回で間違えた問題を練習してから、もう一度解きます
+          </p>
+        {:else}
+          {@render sourcePicker()}
+        {/if}
       </div>
     {/snippet}
     {#snippet tools()}
@@ -218,11 +275,17 @@
           disabled={index === 0}
           onclick={() => goTo(index - 1)}>前の問題</button
         >
-        <button
-          class={btn.primary}
-          disabled={index >= list.length - 1}
-          onclick={() => goTo(index + 1)}>次の問題</button
-        >
+        {#if plan && index >= list.length - 1}
+          <button class={btn.primary} onclick={finishAndRetry}
+            >練習を終えてもう一度解く</button
+          >
+        {:else}
+          <button
+            class={btn.primary}
+            disabled={index >= list.length - 1}
+            onclick={() => goTo(index + 1)}>次の問題</button
+          >
+        {/if}
       </div>
     {/snippet}
   </AnswerLayout>

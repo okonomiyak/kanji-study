@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { answerOne, drawOn, inkPixels } from "./helpers";
+import { answerOne, drawOn, inkPixels, selectOnlyRound } from "./helpers";
 
 test("間違えた問題を、漢字を見たり隠したりしながら練習できる。記録は増えない", async ({
   page,
@@ -34,4 +34,49 @@ test("間違えた問題を、漢字を見たり隠したりしながら練習�
   await page.getByRole("link", { name: "戻る" }).click();
   await expect(page.getByTestId("review-count")).toHaveText("1");
   await expect(page.getByText("これまでの解答: 1 問")).toBeVisible();
+});
+
+test("採点後に、間違えた問題を練習してから解き直せる", async ({ page }) => {
+  await page.goto("/#/setup");
+  await selectOnlyRound(page, 49);
+  await page.getByLabel("自由に決める").check();
+  await page.getByLabel("問題数").fill("2");
+  await page.getByRole("button", { name: "2 問で始める" }).click();
+  await page.getByRole("button", { name: "次の問題" }).click();
+  await page.getByRole("button", { name: "採点へ進む" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "採点へ進む" })
+    .click();
+  await page.getByRole("button", { name: "不正解（×）" }).click();
+  await expect(page.getByTestId("progress")).toHaveText("2 / 2"); // 自動で次へ
+  await page.getByRole("button", { name: "不正解（×）" }).click();
+  await page.getByRole("button", { name: "採点を確定" }).click();
+
+  await page
+    .getByRole("button", { name: "間違えた問題を練習してからもう一度" })
+    .click();
+  await expect(page.getByTestId("practice-plan")).toBeVisible();
+  await expect(page.getByTestId("progress")).toHaveText("1 / 2");
+  await expect(page.getByTestId("practice-kanji")).toBeVisible();
+  await page.getByRole("button", { name: "次の問題" }).click();
+  await expect(page.getByTestId("progress")).toHaveText("2 / 2");
+  await page.getByRole("button", { name: "練習を終えてもう一度解く" }).click();
+
+  // 解き直しの回が始まる（間違えた2問）
+  await expect(page.getByRole("button", { name: "中断" })).toBeVisible();
+  await expect(page.getByTestId("progress")).toHaveText("1 / 2");
+});
+
+test("練習する範囲を回で絞れる", async ({ page }) => {
+  await answerOne(page, false, "setup", 49);
+  await answerOne(page, false, "setup", 50);
+  await page.goto("/#/practice");
+  await expect(page.getByTestId("progress")).toHaveText("1 / 2");
+  await page.getByTestId("practice-range").locator("summary").click();
+  const range = page.getByTestId("practice-range");
+  await range.getByLabel("すべての回").uncheck(); // 0問になっても範囲の欄は開いたまま
+  await expect(page.getByText("練習する問題はありません")).toBeVisible();
+  await range.getByRole("button", { name: /第50回/ }).click();
+  await expect(page.getByTestId("progress")).toHaveText("1 / 1");
 });

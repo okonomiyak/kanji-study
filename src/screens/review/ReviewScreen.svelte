@@ -2,18 +2,39 @@
   import CountPicker from "../../components/CountPicker.svelte";
   import { btn } from "../../components/buttons";
   import { pickReview, resolveCount } from "../../domain/picker";
+  import {
+    allRoundsRange,
+    describeRange,
+    resolveRange,
+  } from "../../domain/range";
+  import type { RangeSpec } from "../../domain/types";
+  import { questions } from "../../state/questions.svelte";
+  import RangePicker from "../setup/RangePicker.svelte";
   import { history } from "../../state/history.svelte";
   import { launcher } from "../../state/launcher.svelte";
   import { settings } from "../../state/settings.svelte";
 
   /** 復習の出題（仕様書 6.3）。連続正解の少ないもの、間違いの多いものを優先 */
   let wanted = $state(settings.value.lastCount);
-  const entries = $derived([...history.review.values()]);
+  const allEntries = $derived([...history.review.values()]);
+  // 復習リストにある問題（範囲の選択肢はこの中の回だけ）
+  const reviewQuestions = $derived(
+    questions.list.filter((q) => history.review.has(q.id)),
+  );
+  // 範囲。null は「すべての回」
+  let chosen = $state.raw<RangeSpec | null>(null);
+  const range = $derived(chosen ?? allRoundsRange(reviewQuestions));
+  const inRange = $derived(new Set(resolveRange(reviewQuestions, range)));
+  const entries = $derived(allEntries.filter((e) => inRange.has(e.questionId)));
   const count = $derived(resolveCount(wanted, entries.length));
 
   async function start() {
     if (count === 0) return;
-    await launcher.launch(pickReview(entries, count, Math.random), "review");
+    await launcher.launch(
+      pickReview(entries, count, Math.random),
+      "review",
+      range,
+    );
   }
 </script>
 
@@ -25,7 +46,7 @@
 
   <section class="rounded-2xl border border-stone-200 bg-white p-4">
     <p class="mb-1">
-      復習リスト: <strong>{entries.length}</strong> 件
+      復習リスト: <strong>{allEntries.length}</strong> 件
     </p>
     <p class="text-sm text-stone-500">
       {history.breakdown.map((n, i) => `連続正解 ${i}回: ${n}件`).join(" ／ ")}
@@ -38,7 +59,19 @@
     >
   </section>
 
-  {#if entries.length}
+  {#if allEntries.length}
+    <section class="rounded-2xl border border-stone-200 bg-white p-4">
+      <h2 class="mb-3 text-lg font-bold">復習する範囲</h2>
+      <RangePicker
+        questions={reviewQuestions}
+        {range}
+        onchange={(r) => (chosen = r)}
+      />
+      <p class="mt-4 text-stone-600">
+        範囲: {describeRange(range)} ／
+        <strong data-testid="range-count">{entries.length}</strong> 問
+      </p>
+    </section>
     <section class="rounded-2xl border border-stone-200 bg-white p-4">
       <h2 class="mb-3 text-lg font-bold">問題数</h2>
       <CountPicker
@@ -48,7 +81,7 @@
       />
     </section>
     <div class="flex justify-end">
-      <button class={btn.primary} onclick={start}
+      <button class={btn.primary} disabled={count === 0} onclick={start}
         >{count} 問で復習を始める</button
       >
     </div>

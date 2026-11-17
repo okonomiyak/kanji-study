@@ -6,6 +6,8 @@ import { PEN_WIDTHS, type PenWidth } from "../handwriting/strokes";
 export interface Settings {
   penWidth: PenWidth;
   penOnly: boolean;
+  /** 出題で、間違えた問題とまだ解いていない問題を優先する */
+  prioritize: boolean;
   /** 最後に使った出題範囲（仕様書 9.4） */
   lastRange: RangeSpec | null;
   /** 最後に選んだ問題数 */
@@ -18,6 +20,7 @@ const KEY = "kanji-study:settings";
 export const DEFAULT_SETTINGS: Settings = {
   penWidth: "normal",
   penOnly: false,
+  prioritize: false,
   lastRange: null,
   lastCount: 10,
 };
@@ -37,6 +40,10 @@ export function loadSettings(
           : DEFAULT_SETTINGS.penWidth,
       penOnly:
         typeof v.penOnly === "boolean" ? v.penOnly : DEFAULT_SETTINGS.penOnly,
+      prioritize:
+        typeof v.prioritize === "boolean"
+          ? v.prioritize
+          : DEFAULT_SETTINGS.prioritize,
       lastRange: sanitizeRange(v.lastRange),
       lastCount:
         typeof v.lastCount === "number" &&

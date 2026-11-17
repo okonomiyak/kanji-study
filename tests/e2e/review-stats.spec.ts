@@ -92,3 +92,17 @@ test("統計の漢字ごとの一覧を回や結果で絞り込める", async ({
   await page.getByRole("button", { name: "絞り込みを外す" }).click();
   await expect(rows).toHaveCount(2);
 });
+
+test("復習する範囲を回で指定できる", async ({ page }) => {
+  await answerOne(page, false, "setup", 49);
+  await answerOne(page, false, "setup", 50);
+  await page.goto("/#/review");
+  await expect(page.getByTestId("range-count")).toHaveText("2");
+  await expect(page.getByRole("button", { name: /第51回/ })).toHaveCount(0); // 復習リストにある回だけ
+  await page.getByRole("button", { name: /第49回/ }).click(); // 外す
+  await expect(page.getByTestId("range-count")).toHaveText("1");
+  await page.getByRole("radio", { name: /^すべて/ }).check();
+  await page.getByRole("button", { name: "1 問で復習を始める" }).click();
+  await expect(page.getByTestId("progress")).toHaveText("1 / 1");
+  await expect(page.getByText("第50回")).toBeVisible();
+});

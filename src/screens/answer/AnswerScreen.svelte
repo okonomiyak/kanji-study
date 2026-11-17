@@ -3,7 +3,7 @@
   import FuruText from "../../components/FuruText.svelte";
   import AnswerLayout from "../../components/layout/AnswerLayout.svelte";
   import { btn } from "../../components/buttons";
-  import { shouldIgnoreKey } from "../../components/keys";
+  import { inkShortcut, shouldIgnoreKey } from "../../components/keys";
   import HandwritingCanvas from "../../handwriting/HandwritingCanvas.svelte";
   import {
     ERASER_WIDTH,
@@ -70,13 +70,11 @@
 
   function onKey(e: KeyboardEvent) {
     if (shouldIgnoreKey(e, { allowModifiers: true })) return;
-    const k = e.key.toLowerCase();
-    if ((e.ctrlKey || e.metaKey) && (k === "y" || (k === "z" && e.shiftKey))) {
+    const shortcut = inkShortcut(e);
+    if (shortcut) {
       e.preventDefault();
-      redoInk();
-    } else if ((e.ctrlKey || e.metaKey) && k === "z") {
-      e.preventDefault();
-      undoInk();
+      if (shortcut === "undo") undoInk();
+      else redoInk();
     } else if (e.ctrlKey || e.metaKey || e.altKey) {
       return;
     } else if (e.key === "ArrowRight") activeQuiz.goTo(index + 1);
