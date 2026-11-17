@@ -17,6 +17,7 @@
     "functions/**/*.ts",
     "scripts/**/*.ts",
     "tests/e2e/**/*.ts",
+    "tests/unit/session-cookie.test.ts",
     "vite.config.ts",
     "playwright.config.ts"
   ]

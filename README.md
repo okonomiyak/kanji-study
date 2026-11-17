@@ -25,3 +25,16 @@ Nix を使わない場合は Node.js 22 を入れて `npm ci` から始めます
 | `npm run lint` / `npm run check` | ESLint / 型チェック                    |
 | `npm run format`                 | Prettier で整形                        |
 | `nix fmt`                        | treefmt で全体を整形（Nix ファイルも） |
+
+## ログイン（Cloudflare Pages Functions）
+
+`functions/` のミドルウェアが、`/login` 以外の全ページと問題データを守ります。認証情報は環境変数（`AUTH_USER`、`AUTH_PASSWORD`、`AUTH_SECRET`）です。
+
+手元でログインを含めて試すとき:
+
+```sh
+cp .dev.vars.example .dev.vars   # 値は手元用
+npm run pages:dev                # http://localhost:8788
+```
+
+Cloudflare 側の設定は [docs/cloudflare-setup.md](docs/cloudflare-setup.md) を参照してください。
