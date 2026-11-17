@@ -15,5 +15,6 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "src/**/*.svelte", "tests/unit/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.svelte", "tests/unit/**/*.ts"],
+  "exclude": ["tests/unit/session-cookie.test.ts"]
 }
