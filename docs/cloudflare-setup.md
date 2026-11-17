@@ -2,14 +2,17 @@
 
 ## 1. Pages プロジェクトを作る
 
-1. Cloudflare のダッシュボード → **Workers & Pages** → **作成** → **Pages** → **Git に接続**
+> **注意**: いまのダッシュボードでは、最初に出る「アプリケーションを作成」の流れで進むと **Workers** のプロジェクトになります（「Deploy command: `npx wrangler deploy`」の欄がある画面）。このサイトは **Pages**（Pages Functions でログインを行う）なので、その画面では進めず **Back** で戻ってください。
+
+1. Cloudflare のダッシュボード → **Workers & Pages** → **作成** → **Pages** タブ（または画面下の「Pages を使いたい場合はこちら」）→ **既存の Git リポジトリをインポート**（Git に接続）
 2. GitHub の `taitan291/kanji` を選ぶ（非公開リポジトリなので、Cloudflare の GitHub アプリにこのリポジトリへのアクセスを許可する）
 3. ビルドの設定:
    - フレームワーク プリセット: なし
    - ビルドコマンド: `npm run build`
    - ビルド出力ディレクトリ: `dist`
    - 本番ブランチ: `main`
-   - 環境変数 `NODE_VERSION` = `22`（`.nvmrc` があれば不要）
+   - Node.js のバージョンはリポジトリの `.nvmrc`（22）が使われるので、設定は不要
+   - 「デプロイコマンド」の欄が出たら、それは Workers の画面です（上の注意を参照）
 
 ## 2. ログイン用のシークレットを設定する
 
