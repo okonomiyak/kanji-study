@@ -16,3 +16,12 @@ export function shouldIgnoreKey(
     return true;
   return document.querySelector('[role="dialog"]') !== null;
 }
+
+/** 手書きの「1つ戻す」（Ctrl/⌘+Z）と「やり直す」（Ctrl/⌘+Shift+Z、Ctrl+Y）のキーか */
+export function inkShortcut(e: KeyboardEvent): "undo" | "redo" | null {
+  if (!(e.ctrlKey || e.metaKey)) return null;
+  const k = e.key.toLowerCase();
+  if (k === "y" || (k === "z" && e.shiftKey)) return "redo";
+  if (k === "z") return "undo";
+  return null;
+}

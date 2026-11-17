@@ -2,13 +2,16 @@
   import FuruText from "../../components/FuruText.svelte";
   import AnswerLayout from "../../components/layout/AnswerLayout.svelte";
   import { btn } from "../../components/buttons";
-  import { shouldIgnoreKey } from "../../components/keys";
+  import { inkShortcut, shouldIgnoreKey } from "../../components/keys";
   import {
     practiceQuestions,
     type PracticeSource,
   } from "../../domain/practice";
-  import { listRounds } from "../../domain/questions";
-  import { describeRange, resolveRange } from "../../domain/range";
+  import {
+    allRoundsRange,
+    describeRange,
+    resolveRange,
+  } from "../../domain/range";
   import { shuffle } from "../../domain/random";
   import type { RangeSpec } from "../../domain/types";
   import RangePicker from "../setup/RangePicker.svelte";
@@ -75,9 +78,7 @@
   let chosen = $state.raw<RangeSpec | null>(null);
   let rangeOpen = $state(false);
   const sourceList = $derived(source === "review" ? reviewList : missedList);
-  const range = $derived(
-    chosen ?? { spans: [], rounds: listRounds(sourceList) },
-  );
+  const range = $derived(chosen ?? allRoundsRange(sourceList));
 
   const list = $derived.by(() => {
     if (plan) return planList;
@@ -114,19 +115,18 @@
 
   function onKey(e: KeyboardEvent) {
     if (shouldIgnoreKey(e, { allowModifiers: true })) return;
-    const k = e.key.toLowerCase();
-    if ((e.ctrlKey || e.metaKey) && (k === "y" || (k === "z" && e.shiftKey))) {
+    const shortcut = inkShortcut(e);
+    if (shortcut) {
       e.preventDefault();
-      redoInk();
-    } else if ((e.ctrlKey || e.metaKey) && k === "z") {
-      e.preventDefault();
-      undoInk();
+      if (shortcut === "undo") undoInk();
+      else redoInk();
     } else if (e.ctrlKey || e.metaKey || e.altKey) {
       return;
     } else if (e.key === "ArrowRight") goTo(index + 1);
     else if (e.key === "ArrowLeft") goTo(index - 1);
-    else if (k === "h") hidden = !hidden;
-    else if (k === "e") tool = tool === "pen" ? "eraser" : "pen";
+    else if (e.key.toLowerCase() === "h") hidden = !hidden;
+    else if (e.key.toLowerCase() === "e")
+      tool = tool === "pen" ? "eraser" : "pen";
   }
 </script>
 

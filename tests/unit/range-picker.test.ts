@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  allRoundsRange,
   describeRange,
   resolveRange,
   sanitizeRange,
@@ -155,5 +156,14 @@ describe("間違えた問題・まだ解いていない問題を優先", () => {
       expect([...priority].every((id) => ten.includes(id))).toBe(true);
     }
     expect(pickPrioritized(ids, 100, priority, seededRng(1))).toHaveLength(20);
+  });
+});
+
+describe("すべての回", () => {
+  it("問題に出てくる回をすべて選ぶ", () => {
+    const qs = loadFixtureQuestions();
+    const r = allRoundsRange(qs);
+    expect(r.spans).toEqual([]);
+    expect(resolveRange(qs, r)).toHaveLength(qs.length);
   });
 });

@@ -2,8 +2,11 @@
   import CountPicker from "../../components/CountPicker.svelte";
   import { btn } from "../../components/buttons";
   import { pickReview, resolveCount } from "../../domain/picker";
-  import { listRounds } from "../../domain/questions";
-  import { describeRange, resolveRange } from "../../domain/range";
+  import {
+    allRoundsRange,
+    describeRange,
+    resolveRange,
+  } from "../../domain/range";
   import type { RangeSpec } from "../../domain/types";
   import { questions } from "../../state/questions.svelte";
   import RangePicker from "../setup/RangePicker.svelte";
@@ -20,9 +23,7 @@
   );
   // 範囲。null は「すべての回」
   let chosen = $state.raw<RangeSpec | null>(null);
-  const range = $derived(
-    chosen ?? { spans: [], rounds: listRounds(reviewQuestions) },
-  );
+  const range = $derived(chosen ?? allRoundsRange(reviewQuestions));
   const inRange = $derived(new Set(resolveRange(reviewQuestions, range)));
   const entries = $derived(allEntries.filter((e) => inRange.has(e.questionId)));
   const count = $derived(resolveCount(wanted, entries.length));

@@ -1,4 +1,4 @@
-import { compareRefs } from "./questions";
+import { compareRefs, listRounds } from "./questions";
 import type { Question, QuestionId, RangeSpec } from "./types";
 
 export const EMPTY_RANGE: RangeSpec = { spans: [], rounds: [] };
@@ -69,4 +69,9 @@ export function sanitizeRange(value: unknown): RangeSpec | null {
     })),
     rounds,
   };
+}
+
+/** 問題に出てくるすべての回を選んだ範囲 */
+export function allRoundsRange(questions: readonly Question[]): RangeSpec {
+  return { spans: [], rounds: listRounds(questions) };
 }

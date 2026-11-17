@@ -7,8 +7,11 @@
     priorityIds,
     resolveCount,
   } from "../../domain/picker";
-  import { listRounds } from "../../domain/questions";
-  import { EMPTY_RANGE, describeRange, resolveRange } from "../../domain/range";
+  import {
+    allRoundsRange,
+    describeRange,
+    resolveRange,
+  } from "../../domain/range";
   import type { RangeSpec } from "../../domain/types";
   import { history } from "../../state/history.svelte";
   import { launcher } from "../../state/launcher.svelte";
@@ -16,14 +19,9 @@
   import { settings } from "../../state/settings.svelte";
   import RangePicker from "./RangePicker.svelte";
 
-  // 回の選択は、開くたびに「すべての回」から始める（問題データの読み込みを待つ）
-  let range = $state<RangeSpec>(EMPTY_RANGE);
-  let initialized = false;
-  $effect(() => {
-    if (initialized || questions.list.length === 0) return;
-    initialized = true;
-    range = { spans: [], rounds: listRounds(questions.list) };
-  });
+  // 回の選択は、開くたびに「すべての回」から始める。null は「すべての回」
+  let chosen = $state.raw<RangeSpec | null>(null);
+  const range = $derived(chosen ?? allRoundsRange(questions.list));
   let wanted = $state(settings.value.lastCount);
 
   const ids = $derived(resolveRange(questions.list, range));
@@ -37,7 +35,7 @@
 
   async function start() {
     if (count === 0) return;
-    const snapshot = $state.snapshot(range) as RangeSpec;
+    const snapshot = structuredClone(range);
     settings.update({ lastRange: snapshot, lastCount: wanted, prioritize });
     const picked = prioritize
       ? pickPrioritized(
@@ -62,7 +60,7 @@
     <RangePicker
       questions={questions.list}
       {range}
-      onchange={(r) => (range = r)}
+      onchange={(r) => (chosen = r)}
     />
     <p class="mt-4 text-stone-600">
       範囲: {describeRange(range)} ／
