@@ -1,0 +1,73 @@
+import js from "@eslint/js";
+import ts from "typescript-eslint";
+import svelte from "eslint-plugin-svelte";
+import globals from "globals";
+
+const restrict = (patterns) => ({
+  "no-restricted-imports": ["error", { patterns }],
+});
+
+export default ts.config(
+  { ignores: ["dist/", ".wrangler/", "node_modules/", "coverage/"] },
+  js.configs.recommended,
+  ...ts.configs.recommended,
+  ...svelte.configs.recommended,
+  {
+    languageOptions: { globals: { ...globals.browser, ...globals.node } },
+  },
+  {
+    files: ["**/*.svelte", "**/*.svelte.ts"],
+    languageOptions: { parserOptions: { parser: ts.parser } },
+  },
+  // 依存の向き（設計計画書 4.3）
+  {
+    files: ["src/domain/**"],
+    rules: restrict([
+      {
+        group: ["svelte", "svelte/*"],
+        message: "domain は svelte に依存しない",
+      },
+      {
+        group: [
+          "**/storage/**",
+          "**/state/**",
+          "**/screens/**",
+          "**/components/**",
+          "**/handwriting/**",
+        ],
+        message: "domain から上の層を読み込まない",
+      },
+    ]),
+  },
+  {
+    files: [
+      "src/handwriting/strokes.ts",
+      "src/handwriting/renderer.ts",
+      "src/handwriting/input.ts",
+    ],
+    rules: restrict([
+      {
+        group: ["**/storage/**", "**/state/**", "**/screens/**"],
+        message: "handwriting から上の層を読み込まない",
+      },
+    ]),
+  },
+  {
+    files: ["src/storage/**"],
+    rules: restrict([
+      {
+        group: ["**/state/**", "**/screens/**", "**/components/**"],
+        message: "storage から上の層を読み込まない",
+      },
+    ]),
+  },
+  {
+    files: ["src/state/**"],
+    rules: restrict([
+      {
+        group: ["**/screens/**"],
+        message: "state から screens を読み込まない",
+      },
+    ]),
+  },
+);

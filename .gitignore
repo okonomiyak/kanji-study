@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.direnv/
+result
+test-results/
+playwright-report/
+coverage/
+.pre-commit-config.yaml
