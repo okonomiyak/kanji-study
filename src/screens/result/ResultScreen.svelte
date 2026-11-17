@@ -5,6 +5,7 @@
   import { shuffle } from "../../domain/random";
   import { activeQuiz } from "../../state/active-quiz.svelte";
   import { launcher } from "../../state/launcher.svelte";
+  import { practicePlan } from "../../state/practice-plan.svelte";
   import { questions } from "../../state/questions.svelte";
   import { router } from "../../state/router.svelte";
 
@@ -23,6 +24,21 @@
     if (!quiz || wrong.length === 0) return;
     const ids = shuffle(wrong, Math.random);
     await launcher.launch(ids, quiz.mode, quiz.range);
+  }
+
+  /** 間違えた問題を、見ながら書いて練習してから解き直す */
+  function practiceThenRetry() {
+    if (!quiz || wrong.length === 0) return;
+    practicePlan.set({
+      questionIds: [...wrong],
+      retry: {
+        questionIds: shuffle(wrong, Math.random),
+        mode: quiz.mode,
+        ...(quiz.range ? { range: quiz.range } : {}),
+      },
+    });
+    activeQuiz.close();
+    router.go("practice");
   }
 
   function home() {
@@ -65,8 +81,11 @@
     <div class="flex flex-wrap justify-end gap-3">
       <button class={btn.secondary} onclick={home}>ホームへ</button>
       {#if wrong.length}
-        <button class={btn.primary} onclick={retryWrong}
-          >間違えた問題だけもう一度</button
+        <button class={btn.secondary} onclick={retryWrong}
+          >練習せずにもう一度</button
+        >
+        <button class={btn.primary} onclick={practiceThenRetry}
+          >間違えた問題を練習してからもう一度</button
         >
       {/if}
     </div>

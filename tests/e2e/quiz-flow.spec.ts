@@ -48,7 +48,7 @@ test("出題 → 手書き → ○× → 確定 → 間違えた問題だけも�
 
   await expect(page.getByTestId("score")).toContainText("2");
   await expect(page.getByTestId("score")).toContainText("/ 3 問");
-  await page.getByRole("button", { name: "間違えた問題だけもう一度" }).click();
+  await page.getByRole("button", { name: "練習せずにもう一度" }).click();
   await expect(page.getByTestId("progress")).toHaveText("1 / 1");
 
   // 解答記録が増え、復習リストに1件入っている
