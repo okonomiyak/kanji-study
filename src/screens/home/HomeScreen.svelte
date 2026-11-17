@@ -56,7 +56,9 @@
           class={btn.primary}
           onclick={() => {
             activeQuiz.resumePending();
-            router.go(activeQuiz.quiz?.phase === "grading" ? "grading" : "answer");
+            router.go(
+              activeQuiz.quiz?.phase === "grading" ? "grading" : "answer",
+            );
           }}>続きから再開する</button
         >
         <button
