@@ -7,7 +7,9 @@
   import { questions } from "../../state/questions.svelte";
   import { router } from "../../state/router.svelte";
 
-  const quiz = $derived(activeQuiz.quiz?.phase === "confirmed" ? activeQuiz.quiz : null);
+  const quiz = $derived(
+    activeQuiz.quiz?.phase === "confirmed" ? activeQuiz.quiz : null,
+  );
   const wrong = $derived(quiz ? wrongQuestionIds(quiz) : []);
   const total = $derived(quiz?.questionIds.length ?? 0);
 
@@ -33,18 +35,23 @@
   <div class="mx-auto max-w-3xl space-y-6 p-4 pb-16">
     <h1 class="text-xl font-bold">結果</h1>
     <p class="text-4xl font-bold" data-testid="score">
-      {total - wrong.length} <span class="text-xl text-stone-500">/ {total} 問 正解</span>
+      {total - wrong.length}
+      <span class="text-xl text-stone-500">/ {total} 問 正解</span>
     </p>
 
     {#if wrong.length}
       <section>
         <h2 class="mb-2 text-lg font-bold">間違えた問題</h2>
-        <ul class="divide-y divide-stone-200 rounded-2xl border border-stone-200 bg-white">
+        <ul
+          class="divide-y divide-stone-200 rounded-2xl border border-stone-200 bg-white"
+        >
           {#each wrong as id (id)}
             {@const q = questions.get(id)}
             {#if q}
               <li class="flex items-center gap-4 p-3">
-                <span class="min-w-20 font-serif text-2xl font-bold">{q.kanji}</span>
+                <span class="min-w-20 font-serif text-2xl font-bold"
+                  >{q.kanji}</span
+                >
                 <FuruText furu={q.furu} yomi={q.yomi} class="text-base" />
               </li>
             {/if}
@@ -58,7 +65,9 @@
     <div class="flex flex-wrap justify-end gap-3">
       <button class={btn.secondary} onclick={home}>ホームへ</button>
       {#if wrong.length}
-        <button class={btn.primary} onclick={retryWrong}>間違えた問題だけもう一度</button>
+        <button class={btn.primary} onclick={retryWrong}
+          >間違えた問題だけもう一度</button
+        >
       {/if}
     </div>
   </div>
