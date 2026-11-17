@@ -1,7 +1,7 @@
 /** 調整できる値の初期値（仕様書 12章） */
 export const DEFAULT_CONFIG = {
-  /** 復習リストから外れるのに必要な連続正解（1 = 1回正解すれば外れる） */
-  graduateStreak: 1,
+  /** 復習リストから外れるのに必要な連続正解（別々の回で続けて正解した数） */
+  graduateStreak: 2,
   /** バックアップ警告までの日数 */
   backupWarningDays: 7,
   /** 問題数の選択肢 */
