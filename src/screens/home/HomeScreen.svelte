@@ -120,6 +120,9 @@
         >（{history.review.size}件）</span
       >
     </a>
+    <a href="#/practice" class="{btn.secondary} min-h-14">
+      間違えた問題を練習する
+    </a>
     <a href="#/stats" class="{btn.secondary} min-h-14">統計</a>
   </div>
 

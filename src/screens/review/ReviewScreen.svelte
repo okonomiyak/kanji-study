@@ -33,6 +33,9 @@
     <p class="mt-2 text-sm text-stone-500">
       別々の回で {history.breakdown.length} 回続けて正解すると、リストから外れます。
     </p>
+    <a href="#/practice" class="mt-3 inline-block underline"
+      >採点せずに、見ながら書いて練習する</a
+    >
   </section>
 
   {#if entries.length}

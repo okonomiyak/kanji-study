@@ -3,6 +3,7 @@ export const ROUTES = [
   "home",
   "setup",
   "review",
+  "practice",
   "answer",
   "grading",
   "result",
