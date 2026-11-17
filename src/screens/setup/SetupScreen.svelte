@@ -13,6 +13,7 @@
     resolveRange,
   } from "../../domain/range";
   import type { RangeSpec } from "../../domain/types";
+  import { latestResults } from "../../domain/review";
   import { history } from "../../state/history.svelte";
   import { launcher } from "../../state/launcher.svelte";
   import { questions } from "../../state/questions.svelte";
@@ -27,11 +28,10 @@
   const ids = $derived(resolveRange(questions.list, range));
   const count = $derived(resolveCount(wanted, ids.length));
 
-  // 間違えた問題（復習リストにある）と、まだ解いていない問題を優先する
+  // 最後の解答が × の問題と、まだ解いていない問題を優先する
   let prioritize = $state(settings.value.prioritize);
-  const answered = $derived(new Set(history.attempts.map((a) => a.questionId)));
-  const reviewIds = $derived(new Set(history.review.keys()));
-  const priority = $derived(priorityIds(ids, reviewIds, answered));
+  const latest = $derived(latestResults(history.attempts));
+  const priority = $derived(priorityIds(ids, latest));
 
   async function start() {
     if (count === 0) return;
@@ -100,7 +100,7 @@
       <span>間違えた問題と、まだ解いていない問題を優先する</span>
     </button>
     <p class="mt-2 text-sm text-stone-500" data-testid="priority-count">
-      範囲の中で、間違えた問題（復習リスト）{priority.wrong.length} 問・まだ解いていない問題
+      範囲の中で、最後に間違えた問題 {priority.wrong.length} 問・まだ解いていない問題
       {priority.unanswered.length} 問。{prioritize
         ? "この中から先に選び、足りない分は残りから選びます。"
         : "オフのときは範囲の中から均等に選びます。"}

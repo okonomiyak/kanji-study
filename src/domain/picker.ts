@@ -39,18 +39,15 @@ export function pickPrioritized(
 }
 
 /**
- * 優先する問題: いま復習リストにある（間違えて、まだ復習が済んでいない）問題と、まだ一度も解いていない問題
+ * 優先する問題: 最後の解答が × の問題（1回間違えても、次に正解すれば外れる）と、まだ一度も解いていない問題
  */
 export function priorityIds(
   candidates: readonly QuestionId[],
-  reviewIds: ReadonlySet<QuestionId>,
-  answeredIds: ReadonlySet<QuestionId>,
+  latest: ReadonlyMap<QuestionId, boolean>,
 ): { wrong: QuestionId[]; unanswered: QuestionId[] } {
   return {
-    wrong: candidates.filter((id) => reviewIds.has(id)),
-    unanswered: candidates.filter(
-      (id) => !reviewIds.has(id) && !answeredIds.has(id),
-    ),
+    wrong: candidates.filter((id) => latest.get(id) === false),
+    unanswered: candidates.filter((id) => !latest.has(id)),
   };
 }
 

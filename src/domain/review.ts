@@ -17,6 +17,15 @@ export function sortAttempts(attempts: readonly Attempt[]): Attempt[] {
   );
 }
 
+/** 問題ごとの最後の解答（○なら true）。一度も解いていない問題は入らない */
+export function latestResults(
+  attempts: readonly Attempt[],
+): Map<QuestionId, boolean> {
+  const latest = new Map<QuestionId, boolean>();
+  for (const a of sortAttempts(attempts)) latest.set(a.questionId, a.correct);
+  return latest;
+}
+
 /**
  * 解答記録から復習リストを計算する（仕様書 6.1、6.4）。卒業した問題は含まない。
  * - × でリストに入る（連続正解 0）

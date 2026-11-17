@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { computeReview, reviewBreakdown } from "../../src/domain/review";
+import {
+  computeReview,
+  latestResults,
+  reviewBreakdown,
+} from "../../src/domain/review";
 import { att } from "./helpers";
 
 const G = 3;
@@ -83,5 +87,16 @@ describe("復習のルール（仕様書 6.1）", () => {
       att("1-2", true, 3),
     ];
     expect(reviewBreakdown(computeReview(a, G), G)).toEqual([1, 1, 1]);
+  });
+
+  it("最後の解答: 1回間違えても、次に正解すれば ○", () => {
+    const latest = latestResults([
+      att("49-1", false, 1),
+      att("49-2", false, 1),
+      att("49-1", true, 2),
+    ]);
+    expect(latest.get("49-1")).toBe(true);
+    expect(latest.get("49-2")).toBe(false);
+    expect(latest.has("49-3")).toBe(false);
   });
 });

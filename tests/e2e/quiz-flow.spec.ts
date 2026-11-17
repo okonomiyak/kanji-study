@@ -116,7 +116,7 @@ test("間違えた問題とまだ解いていない問題を優先する切り�
   await page.goto("/#/setup");
   await selectOnlyRound(page, 49);
   await expect(page.getByTestId("priority-count")).toContainText(
-    "間違えた問題（復習リスト）1 問・まだ解いていない問題 21 問",
+    "最後に間違えた問題 1 問・まだ解いていない問題 21 問",
   );
   const sw = page.getByRole("switch", {
     name: "間違えた問題と、まだ解いていない問題を優先する",
