@@ -5,6 +5,8 @@
   import GradingScreen from "./screens/grading/GradingScreen.svelte";
   import HomeScreen from "./screens/home/HomeScreen.svelte";
   import ResultScreen from "./screens/result/ResultScreen.svelte";
+  import ReviewScreen from "./screens/review/ReviewScreen.svelte";
+  import StatsScreen from "./screens/stats/StatsScreen.svelte";
   import SettingsScreen from "./screens/settings/SettingsScreen.svelte";
   import SetupScreen from "./screens/setup/SetupScreen.svelte";
   import TrialScreen from "./screens/trial/TrialScreen.svelte";
@@ -49,6 +51,10 @@
   </main>
 {:else if router.current === "setup"}
   <SetupScreen />
+{:else if router.current === "review"}
+  <ReviewScreen />
+{:else if router.current === "stats"}
+  <StatsScreen />
 {:else if router.current === "answer"}
   <AnswerScreen />
 {:else if router.current === "grading"}
