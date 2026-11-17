@@ -133,11 +133,13 @@
         >{history.review.size}</span
       >
       件
-      <span class="ml-2 text-sm text-stone-500">
-        （連続正解 {history.breakdown
-          .map((n, i) => `${i}回: ${n}`)
-          .join(" / ")}）
-      </span>
+      {#if history.breakdown.length > 1}
+        <span class="ml-2 text-sm text-stone-500">
+          （連続正解 {history.breakdown
+            .map((n, i) => `${i}回: ${n}`)
+            .join(" / ")}）
+        </span>
+      {/if}
     </p>
   </section>
 

@@ -1,20 +1,15 @@
 import { expect, test } from "@playwright/test";
 import { answerOne } from "./helpers";
 
-test("× で復習リストに入り、3回続けて ○ で外れる。統計にも反映される", async ({
+test("× で復習リストに入り、次に ○ で外れる。統計にも反映される", async ({
   page,
 }) => {
   await page.goto("/");
   await answerOne(page, false);
   await expect(page.getByTestId("review-count")).toHaveText("1");
-
-  for (let i = 0; i < 2; i++) await answerOne(page, true, "review");
-  await expect(page.getByTestId("review-count")).toHaveText("1");
-  await expect(
-    page.getByText("連続正解 0回: 0 / 1回: 0 / 2回: 1"),
-  ).toBeVisible();
   await answerOne(page, true, "review");
   await expect(page.getByTestId("review-count")).toHaveText("0");
+  for (let i = 0; i < 2; i++) await answerOne(page, true);
 
   await page.getByRole("link", { name: "統計" }).click();
   await expect(page.getByTestId("total")).toHaveText("4");
