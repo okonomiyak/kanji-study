@@ -9,6 +9,7 @@
     type Op,
     type Tool,
   } from "../../handwriting/strokes";
+  import { renderOps, setupCanvas } from "../../handwriting/renderer";
   import ToolBar from "../answer/ToolBar.svelte";
 
   /** 試し書き（フェーズ3の確認用） */
@@ -20,10 +21,8 @@
   function measure() {
     const c = document.createElement("canvas");
     const t0 = performance.now();
-    import("../../handwriting/renderer").then(({ renderOps, setupCanvas }) => {
-      renderOps(setupCanvas(c, 600, window.devicePixelRatio || 1), ops);
-      lastRenderMs = Math.round((performance.now() - t0) * 10) / 10;
-    });
+    renderOps(setupCanvas(c, 600, window.devicePixelRatio || 1), ops);
+    lastRenderMs = Math.round((performance.now() - t0) * 10) / 10;
   }
 </script>
 

@@ -37,7 +37,11 @@ export function attachInput(
     e.preventDefault();
     if (current || !accept(e)) return;
     pointerId = e.pointerId;
-    canvas.setPointerCapture?.(e.pointerId);
+    try {
+      canvas.setPointerCapture(e.pointerId);
+    } catch {
+      // 合成イベントなどで捕捉できなくても書ける
+    }
     current = { type: o.getTool(), width: o.getWidth(), points: [toPoint(e)] };
     o.onProgress(current, 0);
   };
