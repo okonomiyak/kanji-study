@@ -56,7 +56,7 @@ Cloudflare 側の設定は [docs/cloudflare-setup.md](docs/cloudflare-setup.md) 
 | 条件                                       | 使うデータ                                                        |
 | ------------------------------------------ | ----------------------------------------------------------------- |
 | `KANJI_DATA_DIR` がある                    | そのフォルダー（手元の `kanji-study-dict`）の `questions.json`    |
-| `KANJI_DATA_TOKEN` がある                  | GitHub から `kanji-study-dict` の `questions.json` を取得         |
+| `KANJI_DATA_TAKEN` がある                  | GitHub から `kanji-study-dict` の `questions.json` を取得         |
 | すでに `public/data/questions.json` がある | そのまま                                                          |
 | どれもない                                 | 見本データ（`tests/fixtures/sample-questions.json`、自作の129問） |
 

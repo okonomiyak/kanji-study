@@ -23,21 +23,21 @@
 | `AUTH_USER` | ログインのユーザー名 |
 | `AUTH_PASSWORD` | ログインのパスワード（長めのもの） |
 | `AUTH_SECRET` | Cookie 署名用のランダムな文字列。例: `openssl rand -base64 32` の出力 |
-| `KANJI_DATA_TOKEN` | 問題データ（非公開リポジトリ `taitan291/kanji-study-dict`）を読むための GitHub トークン。下の 2.1 を参照 |
+| `KANJI_DATA_TAKEN` | 問題データ（非公開リポジトリ `taitan291/kanji-study-dict`）を読むための GitHub トークン。下の 2.1 を参照 |
 
 - 3つのどれかが無いと、誰もログインできません（安全側に倒しています）。
 - 追加・変更したあとは、**デプロイをやり直す**と反映されます（**デプロイ** → 最新のもの → **再試行**）。
 - パスワードを変えたいとき: `AUTH_PASSWORD` を変えて再デプロイ。
 - 全端末のログインを一度に無効にしたいとき（端末をなくしたときなど）: `AUTH_SECRET` を変えて再デプロイ。
 
-### 2.1 問題データ用のトークン（`KANJI_DATA_TOKEN`）
+### 2.1 問題データ用のトークン（`KANJI_DATA_TAKEN`）
 
 問題データは教材をもとにしているので、公開リポジトリには入れず `taitan291/kanji-study-dict`（非公開）に置いています。ビルドのとき `scripts/fetch-questions.ts` がこのトークンで取ってきます。
 
 1. GitHub → Settings → Developer settings → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**
 2. Repository access: **Only select repositories** → `taitan291/kanji-study-dict`
 3. Permissions: **Contents: Read-only**（ほかは付けない）
-4. 期限を決めて作り、表示された値を Cloudflare の `KANJI_DATA_TOKEN` に貼る（本番とプレビューの両方）
+4. 期限を決めて作り、表示された値を Cloudflare の `KANJI_DATA_TAKEN` に貼る（本番とプレビューの両方）
 5. 期限が切れると本番ビルドが失敗します。そのときは作り直して値を入れ替え、再デプロイします。
 
 ### 2.2 問題を足したら自動で作り直す（Deploy Hook）
