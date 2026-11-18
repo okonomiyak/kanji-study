@@ -41,11 +41,26 @@ Cloudflare 側の設定は [docs/cloudflare-setup.md](docs/cloudflare-setup.md) 
 
 ## 問題を足す・直す
 
-1. `public/data/questions.json` を編集する（形式は [docs/spec.md](docs/spec.md) の 9.2）。
+問題データは教材をもとにしているため、このリポジトリには入れず、非公開リポジトリ `taitan291/kanji-study-dict` の `questions.json` に置いています。
+
+1. `kanji-study-dict` の `questions.json` を編集する（形式は [docs/spec.md](docs/spec.md) の 9.2）。
    - 回の番号と問題番号（ID `"49-1"` など）は一度決めたら変えない。直すときは中身だけを直す。
    - `yomi` は `furu` の中にちょうど1回出てくるようにする。
-2. `npm run validate:questions` で検査する（コミット時の pre-commit とビルドでも自動で検査される）。
-3. `main` に push すると Cloudflare Pages が自動でデプロイする。アプリは次に開いたとき（ネットにつながっていれば）新しい問題を読み込む。
+2. 検査する: このリポジトリで `KANJI_DATA_DIR=../kanji-study-dict npm run fetch:data && npm run validate:questions`（ビルドでも自動で検査される）。
+3. `kanji-study-dict` の `main` に push すると、その GitHub Actions が Cloudflare Pages の Deploy Hook を呼んでサイトを作り直す。アプリは次に開いたとき（ネットにつながっていれば）新しい問題を読み込む。
+
+### 問題データの取り込み（`npm run fetch:data`）
+
+`npm run dev` と `npm run build` の最初に自動で動き、`public/data/questions.json`（git には入らない）を用意します。
+
+| 条件                                       | 使うデータ                                                        |
+| ------------------------------------------ | ----------------------------------------------------------------- |
+| `KANJI_DATA_DIR` がある                    | そのフォルダー（手元の `kanji-study-dict`）の `questions.json`    |
+| `KANJI_DATA_TOKEN` がある                  | GitHub から `kanji-study-dict` の `questions.json` を取得         |
+| すでに `public/data/questions.json` がある | そのまま                                                          |
+| どれもない                                 | 見本データ（`tests/fixtures/sample-questions.json`、自作の129問） |
+
+テストと CI は見本データで動きます。Cloudflare Pages の本番ビルド（`main`）で本物が取れないときは、ビルドを失敗させます。
 
 ## パスワードを変える
 

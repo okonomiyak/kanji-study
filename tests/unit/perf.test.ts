@@ -8,11 +8,11 @@ import {
 } from "../../src/domain/stats";
 import type { Attempt } from "../../src/domain/types";
 import { seededRng } from "../../src/domain/random";
-import { loadRealQuestions } from "./helpers";
+import { loadSampleQuestions } from "./helpers";
 
 describe("計算の速さ（計画書 フェーズ5: 解答記録1万件）", () => {
   it("復習と統計を合わせて 200ms 以内", () => {
-    const qs = loadRealQuestions().questions;
+    const qs = loadSampleQuestions().questions;
     const rng = seededRng(42);
     const attempts: Attempt[] = Array.from({ length: 10_000 }, (_, i) => ({
       id: `a${i}`,

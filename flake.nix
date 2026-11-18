@@ -76,10 +76,9 @@
             };
             validate-questions = {
               enable = true;
-              name = "validate questions.json";
+              name = "validate sample questions";
               entry = "npx --no-install tsx scripts/validate-questions.ts";
-              files = "^public/data/questions\\.json$";
-              pass_filenames = false;
+              files = "^tests/fixtures/sample-questions\\.json$";
               language = "system";
             };
           };

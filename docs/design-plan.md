@@ -2,7 +2,7 @@
 
 最終更新: 2026-11-17
 もとにした仕様書: [spec.md](./spec.md)（ドラフト v0.1）
-問題データ: [../public/data/questions.json](../public/data/questions.json)（第49〜54回、129問）
+問題データ: 非公開リポジトリ `taitan291/kanji-study-dict` の `questions.json`（第49〜54回、129問）。ビルド時に `scripts/fetch-questions.ts` が `public/data/questions.json` へ取ってくる
 
 この文書は、仕様書をどう作るかを決めるものです。**ファイル構成、モジュール構成、リファクタの進め方、全体の作業順序**をまとめます。コードはまだ書きません。
 

@@ -7,8 +7,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "npm run validate:questions && vite build",
+    "dev": "npm run fetch:data && vite",
+    "build": "npm run fetch:data && npm run validate:questions && vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json --noEmit",
     "lint": "eslint .",
@@ -18,6 +18,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "validate:questions": "tsx scripts/validate-questions.ts",
+    "fetch:data": "tsx scripts/fetch-questions.ts",
     "pages:dev": "npm run build && wrangler pages dev dist"
   },
   "devDependencies": {
