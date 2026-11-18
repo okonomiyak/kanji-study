@@ -4,7 +4,7 @@
  *
  * 取ってくる先（上から順に試す）:
  *   1. KANJI_DATA_DIR  … 手元に clone した kanji-study-dict のフォルダー
- *   2. KANJI_DATA_TOKEN … GitHub のトークン（kanji-study-dict の Contents を読めるもの）
+ *   2. KANJI_DATA_TAKEN … GitHub のトークン（kanji-study-dict の Contents を読めるもの）
  *   3. すでに public/data/questions.json がある … そのまま使う（手元で一度取ったもの）
  *   4. どれもない … 見本データ（tests/fixtures/sample-questions.json、自作の129問）を使う
  *
@@ -29,7 +29,7 @@ function fail(message: string): never {
 mkdirSync(dirname(OUT), { recursive: true });
 
 const dir = process.env.KANJI_DATA_DIR;
-const token = process.env.KANJI_DATA_TOKEN;
+const token = process.env.KANJI_DATA_TAKEN;
 
 if (dir) {
   const src = join(dir, file);
@@ -48,14 +48,14 @@ if (dir) {
   });
   if (!res.ok) {
     fail(
-      `${repo} の ${file} を取得できません（HTTP ${res.status}）。KANJI_DATA_TOKEN の権限と期限を確認してください`,
+      `${repo} の ${file} を取得できません（HTTP ${res.status}）。KANJI_DATA_TAKEN の権限と期限を確認してください`,
     );
   }
   writeFileSync(OUT, await res.text());
   console.log(`fetch-questions: ${repo}@${ref} の ${file} を取得しました`);
 } else if (isProduction) {
   fail(
-    "本番ビルドなのに KANJI_DATA_TOKEN がありません。Cloudflare Pages の変数とシークレットに設定してください",
+    "本番ビルドなのに KANJI_DATA_TAKEN がありません。Cloudflare Pages の変数とシークレットに設定してください",
   );
 } else if (existsSync(OUT)) {
   console.log(`fetch-questions: 既存の ${OUT} を使います`);
