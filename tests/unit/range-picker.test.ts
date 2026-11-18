@@ -14,7 +14,7 @@ import {
   resolveCount,
 } from "../../src/domain/picker";
 import { seededRng } from "../../src/domain/random";
-import { loadFixtureQuestions, loadRealQuestions } from "./helpers";
+import { loadFixtureQuestions, loadSampleQuestions } from "./helpers";
 
 const qs = loadFixtureQuestions();
 
@@ -50,9 +50,9 @@ describe("出題範囲", () => {
     expect(ids).toEqual(["49-10", "50-1", "50-2", "50-3"]);
   });
 
-  it("本物のデータ: 第49回5番〜第51回10番", () => {
-    const real = loadRealQuestions().questions;
-    const ids = resolveRange(real, {
+  it("見本データ: 第49回5番〜第51回10番", () => {
+    const sample = loadSampleQuestions().questions;
+    const ids = resolveRange(sample, {
       spans: [
         { from: { round: 49, number: 5 }, to: { round: 51, number: 10 } },
       ],

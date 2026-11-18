@@ -6,11 +6,11 @@ import {
   parseQuestions,
 } from "../../src/domain/questions";
 import { splitFuru } from "../../src/domain/furu";
-import { loadRealQuestions } from "./helpers";
+import { loadSampleQuestions } from "./helpers";
 
 describe("問題データ", () => {
-  it("本物の129問が読み込め、IDが 49-1 形式になる", () => {
-    const { questions, errors } = loadRealQuestions();
+  it("見本の129問が読み込め、IDが 49-1 形式になる", () => {
+    const { questions, errors } = loadSampleQuestions();
     expect(errors).toEqual([]);
     expect(questions).toHaveLength(129);
     expect(questions[0]?.id).toBe("49-1");
@@ -61,7 +61,7 @@ describe("splitFuru", () => {
     expect(splitFuru("グラウンドをハシる。", "ハシ")).toEqual({
       before: "グラウンドを",
       bold: "ハシ",
-      after: "れる。",
+      after: "る。",
     });
   });
   it("見つからなければ全体を before に", () => {

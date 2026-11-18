@@ -4,6 +4,8 @@ dist/
 .dev.vars
 .direnv/
 /result
+# 問題データは非公開リポジトリ kanji-study-dict から取ってくる（scripts/fetch-questions.ts）
+/public/data/questions.json
 test-results/
 playwright-report/
 coverage/
